@@ -1,0 +1,14 @@
+{
+    "check-coverage": true,
+    "lines": 0,
+    "statements": 0,
+    "functions": 0,
+    "branches": 0,
+    "include": [
+      "./built/lib/**/*.js"
+    ],
+    "reporter": [
+      "lcov",
+      "text"
+    ]
+}

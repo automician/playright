@@ -1,0 +1,18 @@
+git:
+  depth: 1
+
+language: node_js
+node_js:
+  - "8"
+
+addons:
+  chrome: stable
+
+cache: ./node_modules
+install: npm install
+services:
+  - xvfb
+script: npm test
+
+after_script:
+  - "node_modules/.bin/nyc report --reporter=text-lcov | node_modules/.bin/coveralls"
