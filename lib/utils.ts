@@ -21,8 +21,16 @@
 // SOFTWARE.
 
 
-/**
- * !!! Let's export as library API only "stable" in context of naming things;)
- */
+export namespace Url {
 
-export { stage, goto, $ } from './playright';
+    export const isAbsolute = (relativeOrAbsoluteUrl: string): boolean => {
+        return [
+            'http:',
+            'https:',
+            'file:',
+            'about:',
+            'data:',
+        ].some(prefix =>
+            relativeOrAbsoluteUrl.toLowerCase().startsWith(prefix));
+    }
+}

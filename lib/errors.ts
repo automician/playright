@@ -21,8 +21,20 @@
 // SOFTWARE.
 
 
-/**
- * !!! Let's export as library API only "stable" in context of naming things;)
- */
+export class TimeoutError extends Error {
+    constructor(message?: string) {
+        super(message);
+    }
 
-export { stage, goto, $ } from './playright';
+    toString() {
+        const exceptionMsg = `Message: ${this.message}\n`;
+        return exceptionMsg;
+    }
+}
+
+
+export class ConditionNotMatchedError extends Error {
+    constructor(message = 'condition not matched') {
+        super(message);
+    }
+}
