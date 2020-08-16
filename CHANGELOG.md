@@ -4,6 +4,9 @@
 - TBD
 
 ## 0.0.2 (to be released on 2020.08)
+- `goto(url)`
+- `$` to represent located element or collection of elements
+- `stage` to keep all global contexts, options, etc...
 - general waiting for entities
   - via `new Wait(entity).for({toString: () => 'description', call: entity => someCodeOnEntityToWait() })`
   - with some needed callables

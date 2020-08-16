@@ -2,6 +2,8 @@
 
 Play the right test- and user-oriented way with Playwright ;)
 
+It is yet a very early draft version of the wrapper, where we play and experiment with API design to find the most optimal and efficient way of working with Playwright from user and testing perspective. 
+
 ## Table of content
 
 * [Prerequisites](#prerequisites)
@@ -27,6 +29,25 @@ TBD
 ## Usage
 
 ### Quick Start
+
+```typescript
+import { stage, goto, $ } from 'playright'
+
+describe('Ecosia', () => {
+
+    beforeAll(async () => {
+        jasmine.DEFAULT_TIMEOUT_INTERVAL = 100000;
+    });
+
+    it('should search', async () => {
+        await goto('https://www.ecosia.org/');
+
+        const query = $('[name=q]');
+        await query.type('github yashaka selene');
+        await query.press('Enter');
+    })
+});
+```
 
 TBD
 
