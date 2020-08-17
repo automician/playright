@@ -12,7 +12,10 @@
 ## 0.0.next
 - TBD
 
-## 0.0.4 (to be released on 2020.08.x)
+## 0.0.5 (to be released on 2020.08.x)
+- TBD
+
+## 0.0.4 (to be released on 2020.08.18)
 - added Element#fill(value), hover
 
 ## 0.0.3 (released on 2020.08.18)
