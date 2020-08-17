@@ -27,3 +27,4 @@
 
 export { stage, goto, element } from './playright';
 export { perform } from './commands';
+export { have, be } from './conditions'

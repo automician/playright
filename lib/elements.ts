@@ -24,20 +24,37 @@ import * as driver from 'playwright'
 import { Wait } from './wait';
 import { Condition, Locator } from './callables';
 import { Element } from './element'
+import { query } from './queries';
 
 
 /**
  * TODO: consider putting into Playright namespace
  */
-export class Elements {
+export class Elements /*implements AsyncIterable<Element>*/ { // TODO: implement iterator
     constructor(
-        private readonly find: 
-            Locator<driver.ElementHandle<HTMLOrSVGElement>[]>, 
+        private readonly find:
+            Locator<driver.ElementHandle<HTMLOrSVGElement>[]>,
         private readonly options?: ElementsOptions) // TODO: should we just accept Stage here?
     {
         this.find = find;
         this.options = options;
     }
+
+    // [Symbol.asyncIterator](): AsyncIterator<Element, any, undefined> {
+    //     return {
+    //         next(value?: any): Promise<IteratorResult<T>>;
+    //         return?(value?: any): Promise<IteratorResult<T>>;
+    //         throw?(e?: any): Promise<IteratorResult<T>>;
+    //     }
+    // }
+
+    /* --- Located --- */
+
+    get handles(): Promise<driver.ElementHandle<HTMLOrSVGElement>[]> {
+        return this.find.call();
+    }
+
+    /* --- Context-driven --- */
 
     /**
      * TODO: think on proper name...
@@ -53,6 +70,32 @@ export class Elements {
 
     /* --- Locating --- */
 
+    get cached(): Promise<Elements> {
+        const original = this;
+        return this.handles.then(saved => new Elements(
+            {
+                toString: () => original.toString(),
+                call: async () => saved
+            },
+            original.options
+        ));
+    }
+
+    /**
+     * TODO: implement proper async iterator and remove this method
+     */
+    get cachedArray(): Promise<Element[]> {
+        const original = this;
+        return this.handles.then(saved => saved.map((handle, index) =>
+            new Element(
+                {
+                    toString: () => `${original}[${index + 1}]`,
+                    call: async () => handle
+                },
+                original.options
+            )));
+    }
+
     /**
      * 
      * @param number_ number of element in elements collection starting from 1
@@ -62,7 +105,7 @@ export class Elements {
         return new Element({
             toString: () => `${collection}[${number_}]`,
             async call() {
-                const actual = await collection.find.call();
+                const actual = await collection.handles;
                 if (actual.length < number_) {
                     throw new Error(
                         `Cannot get element of number ${number_} ` +
@@ -72,8 +115,8 @@ export class Elements {
                     //       probably with stage option to limit number of 
                     //       elements to log
                 }
-                return actual[number_-1]
-            } 
+                return actual[number_ - 1]
+            }
         })
     }
 
@@ -81,20 +124,51 @@ export class Elements {
         return this.element(1);
     }
 
-    // firstBy(condition: Condition<Elements>): Element {
-    //     // TODO: implement
-    //     return this;
-    // }
+    firstBy(condition: Condition<Element>): Element {
+        const collection = this;
+        return new Element({
+            toString: () => `${collection}.firstBy(${condition})`,
+            async call() {
+                const cached = await collection.cachedArray;
+                for (const element of cached) {
+                    if (await condition.matches(element)) {
+                        return element.handle;
+                    }
+                }
 
-    by(condition: Condition<Elements>): Elements {
-        // TODO: implement
-        return this;
+                const outerHTMLs: string[] = [];
+                for (const element of cached) {
+                    outerHTMLs.push(await query.outerHtml.call(element));
+                }
+
+                throw new Error(
+                    `Cannot find element by condition «${condition}» ` +
+                    `from elements collection:\n[${outerHTMLs}]`
+                );
+            }
+        });
+    }
+
+    by(condition: Condition<Element>): Elements {
+        const collection = this;
+        return new Elements({
+            toString: () => `${collection}.by(${condition})`,
+            async call() {
+                const filtered: driver.ElementHandle<HTMLOrSVGElement>[] = [];
+                for (const element of await collection.cachedArray) {
+                    if (await condition.matches(element)) {
+                        filtered.push(await element.handle);
+                    }
+                }
+                return filtered;
+            }
+        });
     }
 
     /* --- Assertable --- */
 
-    should(condition: Condition<Elements>): Elements {
-        // TODO: implement
+    async should(condition: Condition<Elements>): Promise<Elements> {
+        await this.wait.for(condition);
         return this;
     }
 }

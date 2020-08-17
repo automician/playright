@@ -38,6 +38,12 @@ export class Element {
         this.options = options;
     }
 
+    /* --- Located --- */
+
+    get handle(): Promise<driver.ElementHandle<HTMLOrSVGElement>> {
+        return this.find.call();
+    }
+
     /* --- Context-driven --- */
 
     /**
@@ -66,8 +72,8 @@ export class Element {
 
     /* --- Assertable --- */
 
-    should(condition: Condition<Element>): Element {
-        // TODO: implement
+    async should(condition: Condition<Element>): Promise<Element> {
+        await this.wait.for(condition);
         return this;
     }
 
@@ -136,7 +142,7 @@ export class Element {
             // TODO: log in toString options too in case they are not default
             toString: () => 'click', 
             call: async _ =>
-                await (await this.find.call()).click({
+                await (await this.handle).click({
                     // TODO: o_O not sure wtf so I need the workaround below...
                     button: buttonName === 'left' ? 'left' : 
                         buttonName === 'right' ? 'right' : 
@@ -153,6 +159,9 @@ export class Element {
         return this;
     }
 
+    /**
+     * TODO: shouldn't we call (await this.handle).dbClick() ?
+     */
     async doubleClick(): Promise<Element> {
         this.click({clickCount: 2})
         return this;

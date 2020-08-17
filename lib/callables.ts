@@ -66,9 +66,8 @@ export type Command<T> = Query<T, void>;
 export class Condition<E> implements Callable<E, void> {
 
     constructor(
-        private readonly description: string, 
-        private readonly fn: Lambda<E, void>) 
-    {
+        private readonly description: string,
+        private readonly fn: Lambda<E, void>) {
         this.description = description;
         this.fn = fn;
     }
@@ -89,26 +88,68 @@ export class Condition<E> implements Callable<E, void> {
         return Condition.or(this, condition);
     }
 
+    matches(entity: E): Promise<boolean> {
+        return this.call(entity).then(onSuccess => true, onFailure => false);
+    }
+
+    predicate(): Callable<E, boolean> {
+        const toString = this.toString;
+        const matches = this.matches;
+        return {
+            toString,
+            call: matches
+        }
+    }
+
     toString(): string {
         return this.description;
     }
 }
 
 export namespace Condition {
+
+    export function failIfNot<E>(
+        description: string,
+        predicate: (entity: E) => Promise<boolean>): Condition<E> {
+        return new Condition(
+            description,
+            async (entity: E) => {
+            if (!await predicate(entity)) {
+                throw new ConditionNotMatchedError();
+            }
+        });
+    }
+
+    export function failIfNotActual<E, A>(
+        description: string,
+        query: Callable<E, A>, // TODO: what about accepting simple fn here?
+        predicate: (actual: A) => boolean): Condition<E> {
+
+        return new Condition(
+            description,
+            async (entity: E) => {
+                const actual = await query.call(entity);
+                if (!predicate(actual)) {
+                    throw new Error(`actual ${query}: ${actual}`);
+                }
+            });
+    }
+
+
     /**
      * Negates or inverts condition
      */
-    export const not = <T>(condition: Condition<T>, 
-                           description?: string): Condition<T> => {
+    export const not = <T>(condition: Condition<T>,
+        description?: string): Condition<T> => {
 
         const [isOrHave, ...name] = condition.toString().split(' ');
-        const newDescription = 
+        const newDescription =
             `${isOrHave} ${'is' === isOrHave ? 'not' : 'no'} ${name.join(' ')}`;
-                // TODO: can we simplify this logic?
+        // TODO: can we simplify this logic?
         return new Condition(
             description || newDescription,
             (entity: T) => condition.call(entity).then(
-                onSuccess => { throw new ConditionNotMatchedError() }, 
+                onSuccess => { throw new ConditionNotMatchedError() },
                 onFailure => { return; }));
     };
 
@@ -118,7 +159,7 @@ export namespace Condition {
      */
     export const and = <T>(...conditions: Condition<T>[]): Condition<T> =>
         new Condition(
-            conditions.map(toString).join(' and '), 
+            conditions.map(toString).join(' and '),
             async (entity: T) => {
                 for (const condition of conditions) {
                     await condition.call(entity);
@@ -130,7 +171,7 @@ export namespace Condition {
      */
     export const or = <T>(...conditions: Condition<T>[]): Condition<T> =>
         new Condition(
-            conditions.map(toString).join(' or '), 
+            conditions.map(toString).join(' or '),
             async (entity: T) => {
                 const errors: Error[] = [];
                 for (const condition of conditions) {
@@ -152,5 +193,5 @@ export namespace Condition {
     export const asPredicate = <T>(...conditions: Condition<T>[]) =>
         (entity: T): Promise<boolean> =>
             Condition.and(...conditions).call(entity)
-            .then(_ => true, _ => false);
+                .then(_ => true, _ => false);
 }
