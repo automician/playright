@@ -23,6 +23,7 @@ import { Located } from './located';
 
 import { Url } from './utils';
 import * as driver from 'playwright';
+import { Condition } from './callables';
 
 
 /**
@@ -81,7 +82,7 @@ import * as driver from 'playwright';
  * 
  * - etc?
  */
-export interface Stage {
+export interface Stage { // TODO: should we break it?
     browser?: driver.Browser,
     browserName?: string,
     launchOptions?: driver.LaunchOptions,
@@ -107,6 +108,7 @@ export const stage: Stage = {
 
 // TODO: not sure do we need such "global" method or not...
 // TODO: consider moving to stage.goto(...)
+// TODO: should we name it as visit like in Cypress?
 export const goto = async (relativeOrAbsoluteUrl: string) => {
 
     const absoluteUrl = Url.isAbsolute(relativeOrAbsoluteUrl) ?

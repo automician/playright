@@ -26,3 +26,4 @@
  */
 
 export { stage, goto, $ } from './playright';
+export { perform } from './commands';
