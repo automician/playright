@@ -12,7 +12,10 @@
 ## 0.0.next
 - TBD
 
-## 0.0.3 (to be released on 2020.08.18)
+## 0.0.4 (to be released on 2020.08.x)
+- TBD
+
+## 0.0.3 (released on 2020.08.18)
 - moved Located to lib/experimental
   - let's forget about it for now and stick to classic Element + Elements (aka Collection)
 - added element and elements instead of earlier $ in main api
