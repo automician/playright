@@ -25,5 +25,5 @@
  * !!! Let's export as library API only "stable" in context of naming things;)
  */
 
-export { stage, goto, $ } from './playright';
+export { stage, goto, element } from './playright';
 export { perform } from './commands';

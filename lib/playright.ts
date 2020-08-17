@@ -1,4 +1,3 @@
-import { Located } from './located';
 // MIT License
 //
 // Copyright (c) 2020 Iakiv Kramarenko, Alexander Popov
@@ -24,6 +23,8 @@ import { Located } from './located';
 import { Url } from './utils';
 import * as driver from 'playwright';
 import { Condition } from './callables';
+import { Element } from './element';
+import { Elements } from './elements';
 
 
 /**
@@ -106,9 +107,17 @@ export const stage: Stage = {
 };
 
 
-// TODO: not sure do we need such "global" method or not...
-// TODO: consider moving to stage.goto(...)
-// TODO: should we name it as visit like in Cypress?
+/**
+ * TODO: not sure do we need such "global" method or not...
+ * TODO: consider moving to stage.goto(...)
+ * TODO: should we name it as visit like in Cypress?
+ *       pros:
+ *       + more user oriented name
+ *       cons:
+ *       - playWright API is already pretty complicated and 
+ *         and we seem to keep a lot of its guts,
+ *         so introducing one more name for goto will make things more complex
+ */ 
 export const goto = async (relativeOrAbsoluteUrl: string) => {
 
     const absoluteUrl = Url.isAbsolute(relativeOrAbsoluteUrl) ?
@@ -127,15 +136,19 @@ export const goto = async (relativeOrAbsoluteUrl: string) => {
     await page.goto(absoluteUrl);
 };
 
-const tryToGetPage: () => driver.Page | never = () => {
+export const tryToGetPage: () => driver.Page | never = () => {
    if (!stage.page) {
        throw new Error('you should call goto first;)');
    }  
    return stage.page;
 };
 
-export const $ = (selector: string) => new Located({
-    toString: () => `located by {${selector}}`,
-    first: () => tryToGetPage().$(selector),
-    all: () => tryToGetPage().$$(selector),
+export const element = (selector: string) => new Element({
+    toString: () => `element(${selector})`,
+    call: () => tryToGetPage().$(selector),
+});
+
+export const elements = (selector: string) => new Elements({
+    toString: () => `element(${selector})`,
+    call: () => tryToGetPage().$$(selector),
 });

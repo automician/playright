@@ -36,6 +36,11 @@ export interface Callable<T, R> {
     toString?: () => string
 }
 
+export interface Locator<R> {
+    call: () => Promise<R>,
+    toString?: () => string
+}
+
 
 /**
  * Callable<T, R> alias...

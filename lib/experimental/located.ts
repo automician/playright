@@ -1,4 +1,3 @@
-import { stage } from './playright';
 // MIT License
 //
 // Copyright (c) 2020 Iakiv Kramarenko, Alexander Popov
@@ -20,12 +19,17 @@ import { stage } from './playright';
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
-
-import { Stage } from './playright';
+import { Stage, tryToGetPage } from '../playright';
 import * as driver from 'playwright'
-import { Wait } from './wait';
-import { Condition } from './callables';
+import { Wait } from '../wait';
+import { Condition } from '../callables';
+import { stage } from '../playright';
 
+const $ = (selector: string) => new Located({
+    toString: () => `located by {${selector}}`,
+    first: () => tryToGetPage().$(selector),
+    all: () => tryToGetPage().$$(selector),
+});
 
 /**
  * TODO: consider making first?: optional and generate impl as all()[0]

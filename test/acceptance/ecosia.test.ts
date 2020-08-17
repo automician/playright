@@ -1,7 +1,6 @@
+import { tryToGetPage } from './../../lib/playright';
 import { perform } from './../../lib/commands';
-import * as pr from 'playwright';
-import { stage, goto, $ } from '../../lib'
-import { Condition } from '../../lib/callables';
+import { stage, goto, element } from '../../lib'
 
 describe('Ecosia', () => {
 
@@ -13,14 +12,21 @@ describe('Ecosia', () => {
 
         await goto('https://www.ecosia.org/');
 
-        // const query = $('[name=q]');
+        // await (await tryToGetPage().waitForSelector('[name=q]')).type('github yashaka selene');
+        const query = element('[name=q]');
         // await query.type('github yashaka selene');
+
+        // await (await tryToGetPage().$('[name=q]')).press('Enter');
         // await query.press('Enter');
 
-        await $('[name=q]').type('github yashaka selene')
-            .then(perform.press('Enter'));
+        await query.type('github yashaka selene').then(perform.press('Enter'));
 
-        const results = $('.result')
+        await tryToGetPage().waitForTimeout(4000);
+
+        // await element('[name=q]').type('github yashaka selene')
+        //     .then(perform.press('Enter'));
+
+        const results = element('.result');
 
         // await (await stage.page.waitForSelector(
             // '.result >> xpath=.//*[contains(@class, "result-title") and contains(text(), "yashaka/selene")]')).click()
