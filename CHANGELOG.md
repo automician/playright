@@ -13,7 +13,7 @@
 - TBD
 
 ## 0.0.4 (to be released on 2020.08.x)
-- TBD
+- added Element#fill(value), hover
 
 ## 0.0.3 (released on 2020.08.18)
 - moved Located to lib/experimental

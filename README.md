@@ -41,9 +41,6 @@ describe('Todomvc', () => {
 
     fit('should complete todo', async () => {
 
-        // TODO: the following somehow does not work... why?
-        // stage.launchOptions = {...stage.launchOptions, slowMo: 1000}; 
-
         await goto('http://todomvc.com/examples/emberjs');
 
         await element('#new-todo').type('a').then(perform.press('Enter'));

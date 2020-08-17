@@ -49,6 +49,12 @@ export class Wait<T> {
         return new Wait<T>(this.entity, this.timeout, handler);
     }
 
+    /**
+     * TODO: allow accepting as callable a simple fn, 
+     *       potentially hacked by utils named
+     *       same way like queries
+     * @param callable 
+     */
     async for<R>(callable: Callable<T, R>): Promise<R> {
         const finishTime = new Date().getTime() + this.timeout;
 

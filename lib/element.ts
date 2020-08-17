@@ -95,11 +95,32 @@ export class Element {
             noWaitAfter: false
         }): Promise<Element> {
         this.wait.for({
-            toString: () => 'type',
+            toString: () => `type ${text}`,
             call: async _ =>
                 await (await this.find.call()).type(
                     text,
                     { ...options, timeout: 0 })
+        })
+        return this;
+    }
+
+    /**
+     * 
+     * @param value 
+     * @param options should be like ElementHandleFillOptions from playwright
+     * but without timeout becuase we have our own waiting logic and timeout
+     */
+    async fill(
+        value: string,
+        {
+            noWaitAfter = false
+        } = {}): Promise<Element> {
+        this.wait.for({
+            toString: () => `fill ${value}`,
+            call: async _ =>
+                await (await this.handle).fill(
+                    value,
+                    { noWaitAfter, timeout: 0 })
         })
         return this;
     }
@@ -118,9 +139,9 @@ export class Element {
             noWaitAfter = false
         } = {}): Promise<Element> {
         this.wait.for({
-            toString: () => 'type',
+            toString: () => `press ${key}`,
             call: async _ =>
-                await (await this.find.call()).press(
+                await (await this.handle).press(
                     key,
                     { delay, noWaitAfter, timeout: 0 })
         })
@@ -160,7 +181,7 @@ export class Element {
     }
 
     /**
-     * TODO: shouldn't we call (await this.handle).dbClick() ?
+     * TODO: shouldn't we call (await this.handle).dblClick() ?
      */
     async doubleClick(): Promise<Element> {
         this.click({clickCount: 2})
@@ -168,7 +189,27 @@ export class Element {
     }
 
     async contextClick(): Promise<Element> {
-        this.click({button: 'right'})
+        this.click({button: 'right'}) // TODO: ensure it's correctly logged
+        return this;
+    }
+
+    async hover({
+        position = undefined,
+        modifiers = undefined, // Array<"Alt"|"Control"|"Meta"|"Shift">,
+        force = false,
+    } = {}): Promise<Element> 
+    {
+        this.wait.for({
+            // TODO: log in toString options too in case they are not default
+            toString: () => 'hover', 
+            call: async _ =>
+                await (await this.handle).hover({
+                    position,
+                    modifiers,
+                    force,
+                    timeout: 0
+                })
+        })
         return this;
     }
 }
