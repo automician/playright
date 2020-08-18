@@ -8,15 +8,21 @@
             [object Promise] thrown
           Stack:
 - implement async iterator for Elements
+- tune linter
+  - should not wrap lines less then 80
+    - even if few calls with then
+  - should wrap lines more than 79
 
 ## 0.0.next
 - TBD
 
 ## 0.0.6
-- switch from jasmine to jest
-- switch from tslint to eslint
-- refactor tsconfigs
-- remove test coverage tools
+- added elements to lib index.ts
+- tuned project setup
+  - switch from jasmine to jest
+  - switch from tslint to eslint
+  - refactor tsconfigs
+  - remove test coverage tools
 
 ## 0.0.5 (to be released on 2020.08.x)
 - TBD

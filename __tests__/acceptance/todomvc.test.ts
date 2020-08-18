@@ -1,5 +1,4 @@
-import { elements } from './../../lib/playright';
-import { stage, goto, element, perform, have } from '../../lib';
+import { stage, goto, element, elements, perform, have } from '../../lib';
 
 describe('Todomvc', () => {
   beforeAll(async () => {
@@ -15,18 +14,10 @@ describe('Todomvc', () => {
 
     await goto('http://todomvc.com/examples/emberjs');
 
-    await element('#new-todo')
-      .type('a')
-      .then(perform.press('Enter'));
-    await element('#new-todo')
-      .type('b')
-      .then(perform.press('Enter'));
-    await element('#new-todo')
-      .type('c')
-      .then(perform.press('Enter'));
-    await element('#new-todo')
-      .type('d')
-      .then(perform.press('Enter'));
+    await element('#new-todo').type('a').then(perform.press('Enter'));
+    await element('#new-todo').type('b').then(perform.press('Enter'));
+    await element('#new-todo').type('c').then(perform.press('Enter'));
+    await element('#new-todo').type('d').then(perform.press('Enter'));
     await elements('#todo-list li').should(have.texts('a', 'b', 'c', 'd'));
 
     await elements('#todo-list li')

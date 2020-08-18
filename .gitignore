@@ -6,3 +6,4 @@ package-lock.json
 .vscode
 \.idea/
 .DS_Store
+built/
