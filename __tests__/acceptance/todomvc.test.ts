@@ -6,7 +6,7 @@ describe('Todomvc', () => {
     jasmine.DEFAULT_TIMEOUT_INTERVAL = 100000;
   });
   afterAll(async () => {
-    await stage.browser?.close();
+    await stage.browser.close();
   });
 
   fit('should complete todo', async () => {
@@ -50,4 +50,3 @@ describe('Todomvc', () => {
     await stage.page.waitForTimeout(4000);
   });
 });
-

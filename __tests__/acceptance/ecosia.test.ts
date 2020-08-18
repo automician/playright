@@ -8,7 +8,7 @@ describe('Ecosia', () => {
   });
 
   afterAll(async () => {
-    await stage.browser?.close();
+    await stage.browser.close();
   });
 
   it('should search', async () => {
@@ -34,4 +34,3 @@ describe('Ecosia', () => {
     // '.result >> xpath=.//*[contains(@class, "result-title") and contains(text(), "yashaka/selene")]')).click()
   });
 });
-
