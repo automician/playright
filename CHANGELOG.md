@@ -12,6 +12,12 @@
 ## 0.0.next
 - TBD
 
+## 0.0.6
+- switch from jasmine to jest
+- switch from tslint to eslint
+- refactor tsconfigs
+- remove test coverage tools
+
 ## 0.0.5 (to be released on 2020.08.x)
 - TBD
 
@@ -24,10 +30,10 @@
 - added element and elements instead of earlier $ in main api
 - added Elemment and Elements
 - added Element#click, doubleClick, contextClick, should
-- added to Elements: 
+- added to Elements:
     - `element(numberStartingFromOne)`
     - `first` (alias for `element(1)`)
-    - `by` (aka `filteredBy` from SelenideJs), 
+    - `by` (aka `filteredBy` from SelenideJs),
     - `firstBy` (aka `elementBy` from SelenideJs)
     - `should(condition)`
 - added have.

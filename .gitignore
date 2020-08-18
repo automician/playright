@@ -1,7 +1,7 @@
 node_modules/
 coverage/
 .nyc_output/
-built/
+dist/
 package-lock.json
 .vscode
 \.idea/

@@ -20,76 +20,59 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-import { predicate } from "./utils";
-import { query } from "./queries";
-import { Condition } from "./callables";
-import { Element } from './element'
+import { predicate } from './utils';
+import { query } from './queries';
+import { Condition } from './callables';
+import { Element } from './element';
 
+export namespace match {
+  // TODO: do we need this match namespace?
 
-export namespace match { // TODO: do we need this match namespace?
+  /* --- element conditions --- */
+  // TODO: do we need a nested namespace? like match.element.isVisible ?
 
-    /* --- element conditions --- */
-    // TODO: do we need a nested namespace? like match.element.isVisible ?
+  export const visible = Condition.failIfNot(
+    'is visible',
+    async (element: Element) => element.handle.then((it) => it.boundingBox() != null)
+    // TODO: any better way to check for visibility?
+  );
 
-    export const visible = Condition.failIfNot('is visible',
-        async (element: Element) =>
-            element.handle.then(it => it.boundingBox() != null)
-        // TODO: any better way to check for visibility?
+  export const text = (expected: string | number | RegExp) =>
+    Condition.failIfNotActual(
+      `has text: ${expected}`,
+      query.text,
+      typeof expected === 'string' ? predicate.includes(expected) : predicate.matches(expected)
     );
 
+  export const cssClass = (name: string) =>
+    Condition.failIfNotActual(`has css class '${name}'`, query.attribute('class'), predicate.includesWord(name));
 
-    export const text = (expected: string | number | RegExp) => Condition
-        .failIfNotActual(
-            `has text: ${expected}`,
-            query.text,
-            typeof expected === 'string' ?
-                predicate.includes(expected) :
-                predicate.matches(expected)
-        );
+  /* --- elements collection conditions --- */
 
-    export const cssClass = (name: string) => Condition
-        .failIfNotActual(
-            `has css class '${name}'`,
-            query.attribute('class'),
-            predicate.includesWord(name)
-        );
-
-    /* --- elements collection conditions --- */
-
-    export const texts = (...values: string[] | number[]) => Condition
-        .failIfNotActual(
-            `have texts ${values}`,
-            query.texts,
-            predicate.equalsByContainsToArray(values)
-        );
+  export const texts = (...values: string[] | number[]) =>
+    Condition.failIfNotActual(`have texts ${values}`, query.texts, predicate.equalsByContainsToArray(values));
 }
 
 export namespace have {
-    export const text = (expected: string | number | RegExp) =>
-        match.text(expected);
+  export const text = (expected: string | number | RegExp) => match.text(expected);
 
-    export const cssClass = (name: string) =>
-        match.cssClass(name);
+  export const cssClass = (name: string) => match.cssClass(name);
 
-    export const texts = (...values: string[] | number[]) =>
-        match.texts(...values);
+  export const texts = (...values: string[] | number[]) => match.texts(...values);
 
-    export namespace no {
-        export const text = (expected: string | number | RegExp) =>
-            match.text(expected).not;
+  export namespace no {
+    export const text = (expected: string | number | RegExp) => match.text(expected).not;
 
-        export const cssClass = (name: string) =>
-            match.cssClass(name).not;
+    export const cssClass = (name: string) => match.cssClass(name).not;
 
-        export const texts = (...values: string[] | number[]) =>
-            match.texts(...values).not;
-    }
+    export const texts = (...values: string[] | number[]) => match.texts(...values).not;
+  }
 }
 
 export namespace be {
-    export const visible = match.visible;
+  export const visible = match.visible;
 
-    export namespace not {
-        export const visible = match.visible.not;
-    }
+  export namespace not {
+    export const visible = match.visible.not;
+  }
 }

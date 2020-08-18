@@ -20,64 +20,66 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-import { TimeoutError } from "./errors";
-import { Callable } from "./callables";
-
+import { TimeoutError } from './errors';
+import { Callable } from './callables';
 
 export class Wait<T> {
-    private readonly entity: T;
-    private readonly timeout: number;
-    // TODO: do we need it as public?
-    public readonly handleFailure: (error: TimeoutError) => Promise<Error>;
+  private readonly entity: T;
+  private readonly timeout: number;
+  // TODO: do we need it as public?
+  public readonly handleFailure: (error: TimeoutError) => Promise<Error>;
 
+  constructor(
+    // TODO: consider accepting WaitOptions object instead
+    entity: T,
+    atMost: number,
+    orFailWith: (error: TimeoutError) => Promise<Error> = async (it) => it
+  ) {
+    this.entity = entity;
+    this.timeout = atMost;
+    this.handleFailure = orFailWith;
+  }
 
-    constructor( // TODO: consider accepting WaitOptions object instead
-        entity: T, 
-        atMost: number,
-        orFailWith: (error: TimeoutError) => Promise<Error> = (async it => it))
-    {
-        this.entity = entity;
-        this.timeout = atMost;
-        this.handleFailure = orFailWith;
-    }
+  atMost(timeout: number): Wait<T> {
+    return new Wait<T>(this.entity, timeout, this.handleFailure);
+  }
 
-    atMost(timeout: number): Wait<T> {
-        return new Wait<T>(this.entity, timeout, this.handleFailure);
-    }
+  orFailWith(handler: (error: TimeoutError) => Promise<Error>): Wait<T> {
+    return new Wait<T>(this.entity, this.timeout, handler);
+  }
 
-    orFailWith(handler: (error: TimeoutError) => Promise<Error>): Wait<T> {
-        return new Wait<T>(this.entity, this.timeout, handler);
-    }
+  /**
+   * TODO: allow accepting as callable a simple fn,
+   *       potentially hacked by utils named
+   *       same way like queries
+   * @param callable
+   */
+  async for<R>(callable: Callable<T, R>): Promise<R> {
+    const finishTime = new Date().getTime() + this.timeout;
 
-    /**
-     * TODO: allow accepting as callable a simple fn, 
-     *       potentially hacked by utils named
-     *       same way like queries
-     * @param callable 
-     */
-    async for<R>(callable: Callable<T, R>): Promise<R> {
-        const finishTime = new Date().getTime() + this.timeout;
+    while (true) {
+      try {
+        return await callable.call(this.entity);
+      } catch (reason) {
+        if (new Date().getTime() > finishTime) {
+          const error = new TimeoutError(
+            '\n' +
+              `Timed out after ${this.timeout}ms, while waiting for:\n` +
+              `${this.entity}.${callable}\n` +
+              `\n` +
+              `Reason: ${reason.message}\n`
+          );
 
-        while (true) {
-            try {
-                return await callable.call(this.entity);
-            } catch (reason) {
-                if (new Date().getTime() > finishTime) {
-                    const error = new TimeoutError(
-                        '\n' +
-                        `Timed out after ${this.timeout}ms, while waiting for:\n` +
-                        `${this.entity}.${callable}\n` + 
-                        `\n` +
-                        `Reason: ${reason.message}\n`
-                    );
-
-                    throw this.handleFailure(error);
-                }
-            }
+          throw this.handleFailure(error);
         }
+      }
     }
+  }
 
-    async until<R>(callable: Callable<T, R>): Promise<boolean> {
-        return this.for(callable).then(onSuccess => true, onFailure => false);
-    }
+  async until<R>(callable: Callable<T, R>): Promise<boolean> {
+    return this.for(callable).then(
+      (onSuccess) => true,
+      (onFailure) => false
+    );
+  }
 }

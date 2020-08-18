@@ -19,168 +19,171 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
+
 import { Stage, stage } from './playright';
-import * as driver from 'playwright'
+import * as driver from 'playwright';
 import { Wait } from './wait';
 import { Condition, Locator } from './callables';
-import { Element } from './element'
+import { Element } from './element';
 import { query } from './queries';
-
 
 /**
  * TODO: consider putting into Playright namespace
  */
-export class Elements /*implements AsyncIterable<Element>*/ { // TODO: implement iterator
-    constructor(
-        private readonly find:
-            Locator<driver.ElementHandle<HTMLOrSVGElement>[]>,
-        private readonly options?: ElementsOptions) // TODO: should we just accept Stage here?
-    {
-        this.find = find;
-        this.options = options;
-    }
+export class Elements /*implements AsyncIterable<Element>*/ {
+  // TODO: implement iterator
+  constructor(
+    private readonly find: Locator<driver.ElementHandle<HTMLOrSVGElement>[]>,
+    private readonly options?: ElementsOptions // TODO: should we just accept Stage here?
+  ) {
+    this.find = find;
+    this.options = options;
+  }
 
-    // [Symbol.asyncIterator](): AsyncIterator<Element, any, undefined> {
-    //     return {
-    //         next(value?: any): Promise<IteratorResult<T>>;
-    //         return?(value?: any): Promise<IteratorResult<T>>;
-    //         throw?(e?: any): Promise<IteratorResult<T>>;
-    //     }
-    // }
+  // [Symbol.asyncIterator](): AsyncIterator<Element, any, undefined> {
+  //     return {
+  //         next(value?: any): Promise<IteratorResult<T>>;
+  //         return?(value?: any): Promise<IteratorResult<T>>;
+  //         throw?(e?: any): Promise<IteratorResult<T>>;
+  //     }
+  // }
 
-    /* --- Located --- */
+  /* --- Located --- */
 
-    get handles(): Promise<driver.ElementHandle<HTMLOrSVGElement>[]> {
-        return this.find.call();
-    }
+  get handles(): Promise<driver.ElementHandle<HTMLOrSVGElement>[]> {
+    return this.find.call();
+  }
 
-    /* --- Context-driven --- */
+  /* --- Context-driven --- */
 
-    /**
-     * TODO: think on proper name...
-     * at? with? in? of? ... etc? 
-     */
-    when(options: ElementsOptions): Elements {
-        return new Elements(this.find, options);
-    }
+  /**
+   * TODO: think on proper name...
+   * at? with? in? of? ... etc?
+   */
+  when(options: ElementsOptions): Elements {
+    return new Elements(this.find, options);
+  }
 
-    get wait(): Wait<Elements> {
-        return new Wait(this, stage.timeout);
-    } // $('.item').wait.for({call})
+  get wait(): Wait<Elements> {
+    return new Wait(this, stage.timeout);
+  } // $('.item').wait.for({call})
 
-    /* --- Locating --- */
+  /* --- Locating --- */
 
-    get cached(): Promise<Elements> {
-        const original = this;
-        return this.handles.then(saved => new Elements(
+  get cached(): Promise<Elements> {
+    const original = this;
+    return this.handles.then(
+      (saved) =>
+        new Elements(
+          {
+            toString: () => original.toString(),
+            call: async () => saved,
+          },
+          original.options
+        )
+    );
+  }
+
+  /**
+   * TODO: implement proper async iterator and remove this method
+   */
+  get cachedArray(): Promise<Element[]> {
+    const original = this;
+    return this.handles.then((saved) =>
+      saved.map(
+        (handle, index) =>
+          new Element(
             {
-                toString: () => original.toString(),
-                call: async () => saved
+              toString: () => `${original}[${index + 1}]`,
+              call: async () => handle,
             },
             original.options
-        ));
-    }
+          )
+      )
+    );
+  }
 
-    /**
-     * TODO: implement proper async iterator and remove this method
-     */
-    get cachedArray(): Promise<Element[]> {
-        const original = this;
-        return this.handles.then(saved => saved.map((handle, index) =>
-            new Element(
-                {
-                    toString: () => `${original}[${index + 1}]`,
-                    call: async () => handle
-                },
-                original.options
-            )));
-    }
+  /**
+   *
+   * @param number_ number of element in elements collection starting from 1
+   */
+  element(number_: number): Element {
+    const collection = this;
+    return new Element({
+      toString: () => `${collection}[${number_}]`,
+      async call() {
+        const actual = await collection.handles;
+        if (actual.length < number_) {
+          throw new Error(
+            `Cannot get element of number ${number_} ` + `from elements collection with length ${actual.length}`
+          );
+          // TODO: do we need to print the whole collection here?
+          //       probably with stage option to limit number of
+          //       elements to log
+        }
+        return actual[number_ - 1];
+      },
+    });
+  }
 
-    /**
-     * 
-     * @param number_ number of element in elements collection starting from 1
-     */
-    element(number_: number): Element {
-        const collection = this;
-        return new Element({
-            toString: () => `${collection}[${number_}]`,
-            async call() {
-                const actual = await collection.handles;
-                if (actual.length < number_) {
-                    throw new Error(
-                        `Cannot get element of number ${number_} ` +
-                        `from elements collection with length ${actual.length}`
-                    );
-                    // TODO: do we need to print the whole collection here?
-                    //       probably with stage option to limit number of 
-                    //       elements to log
-                }
-                return actual[number_ - 1]
-            }
-        })
-    }
+  get first(): Element {
+    return this.element(1);
+  }
 
-    get first(): Element {
-        return this.element(1);
-    }
+  firstBy(condition: Condition<Element>): Element {
+    const collection = this;
+    return new Element({
+      toString: () => `${collection}.firstBy(${condition})`,
+      async call() {
+        const cached = await collection.cachedArray;
+        for (const element of cached) {
+          if (await condition.matches(element)) {
+            return element.handle;
+          }
+        }
 
-    firstBy(condition: Condition<Element>): Element {
-        const collection = this;
-        return new Element({
-            toString: () => `${collection}.firstBy(${condition})`,
-            async call() {
-                const cached = await collection.cachedArray;
-                for (const element of cached) {
-                    if (await condition.matches(element)) {
-                        return element.handle;
-                    }
-                }
+        const outerHTMLs: string[] = [];
+        for (const element of cached) {
+          outerHTMLs.push(await query.outerHtml.call(element));
+        }
 
-                const outerHTMLs: string[] = [];
-                for (const element of cached) {
-                    outerHTMLs.push(await query.outerHtml.call(element));
-                }
+        throw new Error(
+          `Cannot find element by condition «${condition}» ` + `from elements collection:\n[${outerHTMLs}]`
+        );
+      },
+    });
+  }
 
-                throw new Error(
-                    `Cannot find element by condition «${condition}» ` +
-                    `from elements collection:\n[${outerHTMLs}]`
-                );
-            }
-        });
-    }
+  by(condition: Condition<Element>): Elements {
+    const collection = this;
+    return new Elements({
+      toString: () => `${collection}.by(${condition})`,
+      async call() {
+        const filtered: driver.ElementHandle<HTMLOrSVGElement>[] = [];
+        for (const element of await collection.cachedArray) {
+          if (await condition.matches(element)) {
+            filtered.push(await element.handle);
+          }
+        }
+        return filtered;
+      },
+    });
+  }
 
-    by(condition: Condition<Element>): Elements {
-        const collection = this;
-        return new Elements({
-            toString: () => `${collection}.by(${condition})`,
-            async call() {
-                const filtered: driver.ElementHandle<HTMLOrSVGElement>[] = [];
-                for (const element of await collection.cachedArray) {
-                    if (await condition.matches(element)) {
-                        filtered.push(await element.handle);
-                    }
-                }
-                return filtered;
-            }
-        });
-    }
+  /* --- Assertable --- */
 
-    /* --- Assertable --- */
-
-    async should(condition: Condition<Elements>): Promise<Elements> {
-        await this.wait.for(condition);
-        return this;
-    }
+  async should(condition: Condition<Elements>): Promise<Elements> {
+    await this.wait.for(condition);
+    return this;
+  }
 }
 
 /**
  * TODO: should we narrow all Stage to a smaller group of options
  *       relevant only for the Element contexts?
- * 
+ *
  * probably it's good to break things down...
  * we can have separate smaller ElementOptions and then merge them into Stage
  * like stage = {...elementOptions, ...}
  */
-export interface ElementsOptions extends Stage {
-
-}
+export interface ElementsOptions extends Stage {}

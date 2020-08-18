@@ -1,6 +1,6 @@
 {
     "compilerOptions": {
-        "target": "es2017",
+        "target": "es5",
         "module": "commonjs",
         "moduleResolution": "node",
         "sourceMap": true,
@@ -8,6 +8,6 @@
         "removeComments": false,
         "noImplicitAny": false,
         "experimentalDecorators": true,
-        "outDir": "../built/"
+        "outDir": "../dist/"
     }
 }

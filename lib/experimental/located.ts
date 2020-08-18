@@ -20,133 +20,119 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 import { Stage, tryToGetPage } from '../playright';
-import * as driver from 'playwright'
+import * as driver from 'playwright';
 import { Wait } from '../wait';
 import { Condition } from '../callables';
 import { stage } from '../playright';
 
-const $ = (selector: string) => new Located({
+const $ = (selector: string) =>
+  new Located({
     toString: () => `located by {${selector}}`,
     first: () => tryToGetPage().$(selector),
     all: () => tryToGetPage().$$(selector),
-});
+  });
 
 /**
  * TODO: consider making first?: optional and generate impl as all()[0]
  */
 export interface Locator<R> {
-    first: () => Promise<R>,
-    all: () => Promise<R[]>,
-    toString?: () => string
+  first: () => Promise<R>;
+  all: () => Promise<R[]>;
+  toString?: () => string;
 }
 
 export class Located {
-    constructor(
-        private readonly find: 
-            Locator<driver.ElementHandle<HTMLOrSVGElement>>, 
-        private readonly options?: LocatedOptions) 
-    {
-        this.find = find;
-        this.options = options;
+  constructor(
+    private readonly find: Locator<driver.ElementHandle<HTMLOrSVGElement>>,
+    private readonly options?: LocatedOptions
+  ) {
+    this.find = find;
+    this.options = options;
+  }
+
+  /**
+   * TODO: think on proper name...
+   * at? with? ... etc?
+   */
+  when(options: LocatedOptions): Located {
+    return new Located(this.find, options);
+  }
+
+  get wait(): Wait<Located> {
+    return new Wait(this, stage.timeout);
+  } // $('.item').wait.for({call})
+
+  /* --- Element actions --- */
+
+  /**
+   *
+   * @param text
+   * @param options should be like ElementHandleTypeOptions from playwright
+   * but without timeout becuase we have our own waiting logic and timeout
+   *
+   * TODO: but should we actually have it?
+   * TODO: shouldn't we reuse playwright's waiting logic where possible?
+   */
+  async type(
+    text: string,
+    options = {
+      delay: 0,
+      noWaitAfter: false,
     }
+  ): Promise<Located> {
+    this.wait.for({
+      toString: () => 'type',
+      call: async (_) => await (await this.find.first()).type(text, { ...options, timeout: 0 }),
+    });
+    return this;
+  }
 
-    /**
-     * TODO: think on proper name...
-     * at? with? ... etc? 
-     */
-    when(options: LocatedOptions): Located {
-        return new Located(this.find, options);
-    }
+  /**
+   *
+   * @param key Name of the key to press or a character to generate,
+   * such as `ArrowLeft` or `a`.
+   * @param options should be like ElementHandlePressOptions from playwright
+   * but without timeout becuase we have our own waiting logic and timeout
+   */
+  async press(key: string, { delay = 0, noWaitAfter = false } = {}): Promise<Located> {
+    this.wait.for({
+      toString: () => 'type',
+      call: async (_) => await (await this.find.first()).press(key, { delay, noWaitAfter, timeout: 0 }),
+    });
+    return this;
+  }
 
-    get wait(): Wait<Located> {
-        return new Wait(this, stage.timeout);
-    } // $('.item').wait.for({call})
+  /* --- Element search --- */
 
-    /* --- Element actions --- */
+  $(selector: string): Located {
+    // TODO: implement
+    return this;
+  }
 
-    /**
-     * 
-     * @param text 
-     * @param options should be like ElementHandleTypeOptions from playwright
-     * but without timeout becuase we have our own waiting logic and timeout
-     * 
-     * TODO: but should we actually have it? 
-     * TODO: shouldn't we reuse playwright's waiting logic where possible?
-     */
-    async type(
-        text: string, 
-        options = {
-            delay: 0, 
-            noWaitAfter: false
-        }): Promise<Located> 
-    {
-        this.wait.for({ 
-            toString: () => 'type', 
-            call: async _ => 
-                await (await this.find.first()).type(
-                    text, 
-                    {...options, timeout: 0})
-        })
-        return this;
-    }
+  /* --- Filtering --- */
 
-    /**
-     * 
-     * @param key Name of the key to press or a character to generate, 
-     * such as `ArrowLeft` or `a`.
-     * @param options should be like ElementHandlePressOptions from playwright
-     * but without timeout becuase we have our own waiting logic and timeout
-     */
-    async press(
-        key: string, 
-        {
-            delay = 0, 
-            noWaitAfter = false
-        } = {}): Promise<Located> 
-    {
-        this.wait.for({ 
-            toString: () => 'type', 
-            call: async _ => 
-                await (await this.find.first()).press(
-                    key, 
-                    {delay, noWaitAfter, timeout: 0})
-        })
-        return this;
-    }
+  // by(condition: Condition<ElementHandle>): Located {
+  //     return new Located({
+  //         toString: () => `${this}.by(${condition})`,
+  //         first: (self: Located) => (await self.find.all()).some(element => Condition.asPredicate(condition).call(element)),
+  //         // all: () => try,
+  //     }
+  // }
 
-    /* --- Element search --- */
+  /* --- asserts --- */
 
-    $(selector: string): Located {
-        // TODO: implement
-        return this;
-    }
-
-    /* --- Filtering --- */
-
-    // by(condition: Condition<ElementHandle>): Located {
-    //     return new Located({
-    //         toString: () => `${this}.by(${condition})`,
-    //         first: (self: Located) => (await self.find.all()).some(element => Condition.asPredicate(condition).call(element)),
-    //         // all: () => try,
-    //     }
-    // }
-
-    /* --- asserts --- */
-
-    should(elementCondition: Condition<Located>): Located {
-        // TODO: implement
-        return this;
-    }
+  should(elementCondition: Condition<Located>): Located {
+    // TODO: implement
+    return this;
+  }
 }
 
 /**
  * TODO: should we narrow all Stage to a smaller group of options
  *       relevant only for the Located contexts?
- * 
+ *
  * probably it's good to break things down...
  * we can have separate smaller LocatedOptions and then merge them into Stage
  * like stage = {...locatedOptions, ...}
  */
-export interface LocatedOptions extends Stage {
-
-}
+export interface LocatedOptions extends Stage {}

@@ -26,10 +26,9 @@ import { Condition } from './callables';
 import { Element } from './element';
 import { Elements } from './elements';
 
-
 /**
  * TODO: asserts for entities...
- * 
+ *
  * we probably will need to assert a lot of things on entities inside the stage
  * here goes the question...
  * define separate classes for all those entities to be able to do things like:
@@ -43,55 +42,56 @@ import { Elements } from './elements';
  *      stage.contextShould(have.*)
  *      stage.browserShould(have.*)
  *      ...
- * 
- * or 
+ *
+ * or
  *      stage.should(have.page.*)
  *      stage.should(have.context.*)
  *      stage.should(have.browser.*)
  *      ...
  *      stage.should(have.network.*) ?
- * 
+ *
  * Another question... Do we need both have and be?
  * Why not to simplify for match.* ?
- * 
- * probably for stage.* it's not relevant... 
+ *
+ * probably for stage.* it's not relevant...
  * e.g. it's ok to say be.opened and have.contexts(4) when asserting browser
  * but if styling like
- *      
+ *
  *      stage.should(have.browser.opened)
  *      stage.should(have.browser.contexts(4))
- * 
+ *
  * then have.* style is totally fine... no need for be.browser.opened
- * 
+ *
  * yet for "located" (element or collection) it might be relevant, compare:
- *      
+ *
  *      $('.item').should(be.visible)
  *      $('.item').should(have.text('foo')
- * 
+ *
  *      vs
- *      
+ *
  *      $('.item').should(match.visible)
  *      $('.item').should(match.text('foo')
- * 
+ *
  * here we can go many ways... for example:
- * 
+ *
  * - match.* for all located (element or collection) conditions
  *   have.*.* for all other entities conditions
- * 
+ *
  * - have.* and be.* for located
  *   have.*.* for all other entities
- * 
+ *
  * - etc?
  */
-export interface Stage { // TODO: should we break it?
-    browser?: driver.Browser,
-    browserName?: string,
-    launchOptions?: driver.LaunchOptions,
-    context?: driver.BrowserContext,
-    contextOptions?: driver.BrowserContextOptions,
-    page?: driver.Page,
-    baseUrl?: string,
-    timeout?: number,
+export interface Stage {
+  // TODO: should we break it?
+  browser?: driver.Browser;
+  browserName?: string;
+  launchOptions?: driver.LaunchOptions;
+  context?: driver.BrowserContext;
+  contextOptions?: driver.BrowserContextOptions;
+  page?: driver.Page;
+  baseUrl?: string;
+  timeout?: number;
 }
 
 /**
@@ -99,13 +99,12 @@ export interface Stage { // TODO: should we break it?
  */
 
 export const stage: Stage = {
-    browserName: 'chromium',
-    launchOptions: { headless: false },
-    contextOptions: {},
-    baseUrl: '',
-    timeout: 4000, // TODO: should we name it like elementsTimeout?
+  browserName: 'chromium',
+  launchOptions: { headless: false },
+  contextOptions: {},
+  baseUrl: '',
+  timeout: 4000, // TODO: should we name it like elementsTimeout?
 };
-
 
 /**
  * TODO: not sure do we need such "global" method or not...
@@ -114,41 +113,41 @@ export const stage: Stage = {
  *       pros:
  *       + more user oriented name
  *       cons:
- *       - playWright API is already pretty complicated and 
+ *       - playWright API is already pretty complicated and
  *         and we seem to keep a lot of its guts,
  *         so introducing one more name for goto will make things more complex
- */ 
+ */
+
 export const goto = async (relativeOrAbsoluteUrl: string) => {
+  const absoluteUrl = Url.isAbsolute(relativeOrAbsoluteUrl)
+    ? relativeOrAbsoluteUrl
+    : stage.baseUrl + relativeOrAbsoluteUrl;
 
-    const absoluteUrl = Url.isAbsolute(relativeOrAbsoluteUrl) ?
-        relativeOrAbsoluteUrl :
-        stage.baseUrl + relativeOrAbsoluteUrl;
+  // TODO: move somewhere to Stage class getter
+  const browser = stage.browser ?? (stage.browser = await driver[stage.browserName].launch(stage.launchOptions));
 
-    // TODO: move somewhere to Stage class getter
-    const browser = stage.browser ?? (stage.browser = 
-        await driver[stage.browserName].launch(stage.launchOptions));
+  const context = stage.context ?? (stage.context = await browser.newContext(stage.contextOptions));
 
-    const context = stage.context ?? (stage.context =
-        await browser.newContext(stage.contextOptions));
+  const page = stage.page ?? (stage.page = await context.newPage());
 
-    const page = stage.page ?? (stage.page = await context.newPage());
-
-    await page.goto(absoluteUrl);
+  await page.goto(absoluteUrl);
 };
 
 export const tryToGetPage: () => driver.Page | never = () => {
-   if (!stage.page) {
-       throw new Error('you should call goto first;)');
-   }  
-   return stage.page;
+  if (!stage.page) {
+    throw new Error('you should call goto first;)');
+  }
+  return stage.page;
 };
 
-export const element = (selector: string) => new Element({
+export const element = (selector: string) =>
+  new Element({
     toString: () => `element(${selector})`,
     call: () => tryToGetPage().$(selector),
-});
+  });
 
-export const elements = (selector: string) => new Elements({
+export const elements = (selector: string) =>
+  new Elements({
     toString: () => `element(${selector})`,
     call: () => tryToGetPage().$$(selector),
-});
+  });

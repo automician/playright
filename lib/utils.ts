@@ -21,83 +21,61 @@
 // SOFTWARE.
 
 export namespace fp {
+  export const pipe = (...fns) => (x) => fns.reduce((y, f) => f(y), x);
 
-    export const pipe = (...fns) => x => fns.reduce((y, f) => f(y), x);
-    
-    export const toString = <O>(obj: O) => obj.toString();
+  export const toString = <O>(obj: O) => obj.toString();
 
-    export function named<F>(toString: string, fn: F): F {
-        fn.toString = () => toString;
-        return fn;
-    }
+  export function named<F>(toString: string, fn: F): F {
+    fn.toString = () => toString;
+    return fn;
+  }
 }
 
 export namespace Url {
-
-    export const isAbsolute = (relativeOrAbsoluteUrl: string): boolean => {
-        return [
-            'http:',
-            'https:',
-            'file:',
-            'about:',
-            'data:',
-        ].some(prefix =>
-            relativeOrAbsoluteUrl.toLowerCase().startsWith(prefix));
-    }
+  export const isAbsolute = (relativeOrAbsoluteUrl: string): boolean => {
+    return ['http:', 'https:', 'file:', 'about:', 'data:'].some((prefix) =>
+      relativeOrAbsoluteUrl.toLowerCase().startsWith(prefix)
+    );
+  };
 }
 
 export namespace predicate {
-    export const isTruthy =
-        <V>(something: V) => something + '' === '' ? true : !!something;
+  export const isTruthy = <V>(something: V) => (something + '' === '' ? true : !!something);
 
-    export const equalsIgnoringCase = <V>(expected: V) => (actual: V) =>
-        (actual + '').toLowerCase() === (expected + '').toLowerCase();
+  export const equalsIgnoringCase = <V>(expected: V) => (actual: V) =>
+    (actual + '').toLowerCase() === (expected + '').toLowerCase();
 
-    export const equals = <V>(expected: V, ignoreCase = false) => (actual: V) =>
-        ignoreCase ?
-            equalsIgnoringCase(expected)(actual) :
-            actual === expected;
+  export const equals = <V>(expected: V, ignoreCase = false) => (actual: V) =>
+    ignoreCase ? equalsIgnoringCase(expected)(actual) : actual === expected;
 
-    export const isGreaterThan = <V>(expected: V) => (actual: V) =>
-        actual > expected;
+  export const isGreaterThan = <V>(expected: V) => (actual: V) => actual > expected;
 
-    export const isGreaterThanOrEqual = <V>(expected: V) => (actual: V) =>
-        actual >= expected;
+  export const isGreaterThanOrEqual = <V>(expected: V) => (actual: V) => actual >= expected;
 
-    export const isLessThan = <V>(expected: V) => (actual: V) =>
-        actual < expected;
+  export const isLessThan = <V>(expected: V) => (actual: V) => actual < expected;
 
-    export const isLessThanOrEqual = <V>(expected: V) => (actual: V) =>
-        actual <= expected;
+  export const isLessThanOrEqual = <V>(expected: V) => (actual: V) => actual <= expected;
 
-    export const includesIgnoringCase = (expected: any) => (actual: any) =>
-        (actual + '').includes(expected + '');
+  export const includesIgnoringCase = (expected: any) => (actual: any) => (actual + '').includes(expected + '');
 
-    export const includes = (expected: any, ignoreCase = false) => (actual: any) =>
-        ignoreCase ?
-            includesIgnoringCase(expected)(actual) :
-            actual.includes(expected);
+  export const includes = (expected: any, ignoreCase = false) => (actual: any) =>
+    ignoreCase ? includesIgnoringCase(expected)(actual) : actual.includes(expected);
 
+  export const matches = (expected: any) => (actual: any) => actual.match(expected);
 
-    export const matches = (expected: any) => (actual: any) =>
-        actual.match(expected);
+  export const includesWordIgnoringCase = (expected: string) => (actual: string) =>
+    actual
+      .toLowerCase()
+      .split(' ')
+      .includes(expected.toLowerCase());
 
-    export const includesWordIgnoringCase = (expected: string) =>
-        (actual: string) =>
-            actual.toLowerCase().split(' ').includes(expected.toLowerCase());
+  export const includesWord = (expected: string, ignoreCase = false) => (actual: string) =>
+    ignoreCase ? includesWordIgnoringCase(expected)(actual) : actual.split(' ').includes(expected);
 
-    export const includesWord = (expected: string, ignoreCase = false) =>
-        (actual: string) =>
-            ignoreCase ?
-                includesWordIgnoringCase(expected)(actual) :
-                actual.split(' ').includes(expected);
+  export const arrayCompareBy = (f) => ([x, ...xs]: any[]) => ([y, ...ys]: any[]) =>
+    x === undefined && y === undefined ? true : Boolean(f(x)(y)) && arrayCompareBy(f)(xs)(ys);
 
-    export const arrayCompareBy = (f) => ([x, ...xs]: any[]) => ([y, ...ys]: any[]) =>
-        x === undefined && y === undefined
-            ? true
-            : Boolean(f(x)(y)) && arrayCompareBy(f)(xs)(ys);
+  export const equalsToArray = arrayCompareBy(equals);
 
-    export const equalsToArray = arrayCompareBy(equals);
-
-    export const equalsByContainsToArray = arrayCompareBy(includes);
+  export const equalsByContainsToArray = arrayCompareBy(includes);
 }

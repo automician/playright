@@ -20,21 +20,19 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-
 export class TimeoutError extends Error {
-    constructor(message?: string) {
-        super(message);
-    }
+  constructor(message?: string) {
+    super(message);
+  }
 
-    toString() {
-        const exceptionMsg = `Message: ${this.message}\n`;
-        return exceptionMsg;
-    }
+  toString() {
+    const exceptionMsg = `Message: ${this.message}\n`;
+    return exceptionMsg;
+  }
 }
 
-
 export class ConditionNotMatchedError extends Error {
-    constructor(message = 'condition not matched') {
-        super(message);
-    }
+  constructor(message = 'condition not matched') {
+    super(message);
+  }
 }
