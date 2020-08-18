@@ -34,7 +34,9 @@
     "keywords": [
         "test",
         "testing",
-        "playwright"
+        "playwright",
+        "selenide",
+        "selene"
     ],
     "author": {
         "name": "Iakiv Kramarenko",
