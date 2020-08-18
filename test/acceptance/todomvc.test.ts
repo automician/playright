@@ -17,38 +17,19 @@ describe('Todomvc', () => {
         await element('#new-todo').type('a').then(perform.press('Enter'));
         await element('#new-todo').type('b').then(perform.press('Enter'));
         await element('#new-todo').type('c').then(perform.press('Enter'));
-        await elements('#todo-list li').should(have.texts('a', 'b', 'c'));
+        await element('#new-todo').type('d').then(perform.press('Enter'));
+        await elements('#todo-list li').should(have.texts('a', 'b', 'c', 'd'));
 
         await elements('#todo-list li').first.element('.toggle').click();
-        await elements('#todo-list li').firstBy(have.text('c'))
+        await elements('#todo-list li').element(2).element('.toggle').click();
+        await elements('#todo-list li').firstBy(have.text('d'))
             .element('.toggle').click();
         await elements('#todo-list li').by(have.cssClass('completed'))
-            .should(have.texts('a', 'c'))
+            .should(have.texts('a', 'b', 'd'))
         await elements('#todo-list li').by(have.no.cssClass('completed'))
-            .should(have.texts('b'))
+            .should(have.texts('c'))
 
         await stage.page.waitForTimeout(4000);
     })
 
-    /**
-     * TODO: by the way, what about the following style:
-
-    fit('should complete todo', async () => {
-
-
-        await goto('http://todomvc.com/examples/emberjs');
-
-        await the('#new-todo').type('a').then(perform.press('Enter'));
-        await the('#new-todo').type('b').then(perform.press('Enter'));
-        await the('#new-todo').type('c').then(perform.press('Enter'));
-        await all('#todo-list li').should(have.texts('a', 'b', 'c'));
-
-        await all('#todo-list li').first.element('.toggle').click();
-        await all('#todo-list li').firstBy(have.text('c')).element('.toggle').click();
-        await all('#todo-list li').by(have.cssClass('completed')).should(have.texts('a', 'c'));
-        await all('#todo-list li').by(have.no.cssClass('completed')).should(have.texts('b'));
-    })
-
-     * TODO: or should we leave it to the user?
-     */
 });
