@@ -190,6 +190,10 @@ export class Element {
     });
     return this;
   }
+
+  toString() {
+    return this.find.toString();
+  }
 }
 
 /**
