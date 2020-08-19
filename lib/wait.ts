@@ -25,7 +25,9 @@ import { Callable } from './callables';
 
 export class Wait<T> {
   private readonly entity: T;
+
   private readonly timeout: number;
+
   // TODO: do we need it as public?
   public readonly handleFailure: (error: TimeoutError) => Promise<Error>;
 
@@ -56,6 +58,7 @@ export class Wait<T> {
    */
   async for<R>(callable: Callable<T, R>): Promise<R> {
     const finishTime = new Date().getTime() + this.timeout;
+    const syncStack = new Error().stack;
 
     while (true) {
       try {
@@ -67,9 +70,10 @@ export class Wait<T> {
             '\n' +
               `Timed out after ${this.timeout}ms, while waiting for:\n` +
               `${this.entity}.${callable}\n` +
-              `\n` +
+              '\n' +
               `Reason: ${reason.message}\n`
           );
+          error.stack = syncStack;
 
           const handledError = await this.handleFailure(error);
           throw handledError;
