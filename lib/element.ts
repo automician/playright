@@ -61,10 +61,9 @@ export class Element {
   /* --- Locating --- */
 
   element(selector: string): Element {
-    const parent = this;
     return new Element({
-      toString: () => ``,
-      call: async () => (await parent.find.call()).$(selector),
+      toString: () => `${this}.element(${selector})`,
+      call: async () => this.handle.then((handle) => handle.$(selector)),
     });
   }
 
