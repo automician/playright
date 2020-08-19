@@ -98,9 +98,9 @@ export class Element {
       noWaitAfter: false,
     }
   ): Promise<Element> {
-    this.wait.for({
+    await this.wait.for({
       toString: () => `type ${text}`,
-      call: async (_) => await (await this.find.call()).type(text, { ...options, timeout: 0 }),
+      call: async () => this.handle.then((handle) => handle.type(text, { ...options, timeout: 0 })),
     });
     return this;
   }
@@ -112,9 +112,9 @@ export class Element {
    * but without timeout becuase we have our own waiting logic and timeout
    */
   async fill(value: string, { noWaitAfter = false } = {}): Promise<Element> {
-    this.wait.for({
+    await this.wait.for({
       toString: () => `fill ${value}`,
-      call: async (_) => await (await this.handle).fill(value, { noWaitAfter, timeout: 0 }),
+      call: async () => this.handle.then((handle) => handle.fill(value, { noWaitAfter, timeout: 0 })),
     });
     return this;
   }
@@ -127,9 +127,9 @@ export class Element {
    * but without timeout becuase we have our own waiting logic and timeout
    */
   async press(key: string, { delay = 0, noWaitAfter = false } = {}): Promise<Element> {
-    this.wait.for({
+    await this.wait.for({
       toString: () => `press ${key}`,
-      call: async (_) => await (await this.handle).press(key, { delay, noWaitAfter, timeout: 0 }),
+      call: async () => this.handle.then((handle) => handle.press(key, { delay, noWaitAfter, timeout: 0 })),
     });
     return this;
   }
@@ -144,21 +144,23 @@ export class Element {
     noWaitAfter = false,
   } = {}): Promise<Element> {
     const buttonName = button;
-    this.wait.for({
+    await this.wait.for({
       // TODO: log in toString options too in case they are not default
       toString: () => 'click',
-      call: async (_) =>
-        await (await this.handle).click({
-          // TODO: o_O not sure wtf so I need the workaround below...
-          button: buttonName === 'left' ? 'left' : buttonName === 'right' ? 'right' : 'middle',
-          clickCount,
-          delay,
-          position,
-          modifiers,
-          force,
-          noWaitAfter,
-          timeout: 0,
-        }),
+      call: async () =>
+        this.handle.then((handle) =>
+          handle.click({
+            // TODO: o_O not sure wtf so I need the workaround below...
+            button: buttonName === 'left' ? 'left' : buttonName === 'right' ? 'right' : 'middle',
+            clickCount,
+            delay,
+            position,
+            modifiers,
+            force,
+            noWaitAfter,
+            timeout: 0,
+          })
+        ),
     });
     return this;
   }
@@ -167,12 +169,12 @@ export class Element {
    * TODO: shouldn't we call (await this.handle).dblClick() ?
    */
   async doubleClick(): Promise<Element> {
-    this.click({ clickCount: 2 });
+    await this.click({ clickCount: 2 });
     return this;
   }
 
   async contextClick(): Promise<Element> {
-    this.click({ button: 'right' }); // TODO: ensure it's correctly logged
+    await this.click({ button: 'right' }); // TODO: ensure it's correctly logged
     return this;
   }
 
@@ -181,16 +183,10 @@ export class Element {
     modifiers = undefined, // Array<"Alt"|"Control"|"Meta"|"Shift">,
     force = false,
   } = {}): Promise<Element> {
-    this.wait.for({
+    await this.wait.for({
       // TODO: log in toString options too in case they are not default
       toString: () => 'hover',
-      call: async (_) =>
-        await (await this.handle).hover({
-          position,
-          modifiers,
-          force,
-          timeout: 0,
-        }),
+      call: async (_) => this.handle.then((handle) => handle.hover({ position, modifiers, force, timeout: 0 })),
     });
     return this;
   }

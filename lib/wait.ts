@@ -59,7 +59,8 @@ export class Wait<T> {
 
     while (true) {
       try {
-        return await callable.call(this.entity);
+        const entity = await callable.call(this.entity);
+        return entity;
       } catch (reason) {
         if (new Date().getTime() > finishTime) {
           const error = new TimeoutError(
@@ -70,7 +71,8 @@ export class Wait<T> {
               `Reason: ${reason.message}\n`
           );
 
-          throw this.handleFailure(error);
+          const handledError = await this.handleFailure(error);
+          throw handledError;
         }
       }
     }
