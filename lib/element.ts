@@ -20,17 +20,17 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-import { Stage, stage } from './playright';
 import * as driver from 'playwright';
-import { Wait } from './wait';
 import { Condition, Locator } from './callables';
+import { Stage, stage } from './playright';
+import { Wait } from './wait';
 
 /**
  * TODO: consider putting into Playright namespace
  */
 export class Element {
   constructor(
-    private readonly find: Locator<driver.ElementHandle<HTMLOrSVGElement>>,
+    private readonly find: Locator<driver.ElementHandle<Node>>,
     private readonly options?: ElementOptions // TODO: should we just accept Stage here?
   ) {
     this.find = find;
