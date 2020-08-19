@@ -12,6 +12,15 @@
   - should not wrap lines less then 80
     - even if few calls with then
   - should wrap lines more than 79
+- change in Element: element(number_: number) to element(index: number)
+- fix [object Object] in error message, 
+  e.g. for elements(...).should(have.texts(...)) it will be:
+
+    Timed out after 4000ms, while waiting for:
+    [object Object].have texts a,b,c,d.
+
+    Reason: actual texts: a,b,c,d
+- update changelow for 0.0.6 accroding to last Sasha's changes
 
 ## 0.0.next
 - TBD

@@ -148,6 +148,6 @@ export const element = (selector: string) =>
 
 export const elements = (selector: string) =>
   new Elements({
-    toString: () => `element(${selector})`,
+    toString: () => `elements(${selector})`,
     call: () => tryToGetPage().$$(selector),
   });
