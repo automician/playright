@@ -39,8 +39,13 @@ export class Element {
 
   /* --- Located --- */
 
-  get handle(): Promise<driver.ElementHandle<HTMLOrSVGElement>> {
-    return this.find.call();
+  get handle(): Promise<driver.ElementHandle<Node>> {
+    return this.find.call().then((handle) => {
+      if (handle === null) {
+        throw new Error('element was not found');
+      }
+      return handle;
+    });
   }
 
   /* --- Context-driven --- */
