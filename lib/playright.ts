@@ -25,6 +25,7 @@ import * as driver from 'playwright';
 import { Condition } from './callables';
 import { Element } from './element';
 import { Elements } from './elements';
+import { Wait } from './wait';
 
 /**
  * TODO: asserts for entities...
@@ -130,7 +131,11 @@ export const goto = async (relativeOrAbsoluteUrl: string) => {
 
   const page = stage.page ?? (stage.page = await context.newPage());
 
-  await page.goto(absoluteUrl);
+  const wait = new Wait(page, stage.timeout);
+  await wait.for({
+    toString: () => `goto ${absoluteUrl}`,
+    call: async () => page.goto(absoluteUrl),
+  });
 };
 
 export const tryToGetPage: () => driver.Page | never = () => {
