@@ -33,7 +33,7 @@ import { query } from './queries';
 export class Elements /*implements AsyncIterable<Element>*/ {
   // TODO: implement iterator
   constructor(
-    private readonly find: Locator<driver.ElementHandle<HTMLOrSVGElement>[]>,
+    private readonly find: Locator<driver.ElementHandle<Node>[]>,
     private readonly options?: ElementsOptions // TODO: should we just accept Stage here?
   ) {
     this.find = find;
@@ -50,7 +50,7 @@ export class Elements /*implements AsyncIterable<Element>*/ {
 
   /* --- Located --- */
 
-  get handles(): Promise<driver.ElementHandle<HTMLOrSVGElement>[]> {
+  get handles(): Promise<driver.ElementHandle<Node>[]> {
     return this.find.call();
   }
 
@@ -159,7 +159,7 @@ export class Elements /*implements AsyncIterable<Element>*/ {
     return new Elements({
       toString: () => `${collection}.by(${condition})`,
       async call() {
-        const filtered: driver.ElementHandle<HTMLOrSVGElement>[] = [];
+        const filtered: driver.ElementHandle<Node>[] = [];
         for (const element of await collection.cachedArray) {
           if (await condition.matches(element)) {
             filtered.push(await element.handle);
