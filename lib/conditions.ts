@@ -51,6 +51,9 @@ export namespace match {
 
   export const texts = (...values: string[] | number[]) =>
     Condition.failIfNotActual(`have texts ${values}`, query.texts, predicate.equalsByContainsToArray(values));
+
+  export const size = (size: number) =>
+    Condition.failIfNotActual(`have size ${size}`, query.count, predicate.equals(size));
 }
 
 export namespace have {
@@ -60,12 +63,16 @@ export namespace have {
 
   export const texts = (...values: string[] | number[]) => match.texts(...values);
 
+  export const size = (size: number) => match.size(size);
+
   export namespace no {
     export const text = (expected: string | number | RegExp) => match.text(expected).not;
 
     export const cssClass = (name: string) => match.cssClass(name).not;
 
     export const texts = (...values: string[] | number[]) => match.texts(...values).not;
+
+    export const size = (size: number) => match.size(size).not;
   }
 }
 
