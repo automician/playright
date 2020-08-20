@@ -176,6 +176,10 @@ export class Elements /*implements AsyncIterable<Element>*/ {
     await this.wait.for(condition);
     return this;
   }
+
+  toString() {
+    return this.find.toString();
+  }
 }
 
 /**
