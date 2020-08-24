@@ -3,10 +3,6 @@ import { perform } from './../../lib/commands';
 import { stage, goto, element } from '../../lib';
 
 describe('Ecosia', () => {
-  beforeAll(async () => {
-    jasmine.DEFAULT_TIMEOUT_INTERVAL = 100000;
-  });
-
   afterAll(async () => {
     await stage.browser.close();
   });

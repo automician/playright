@@ -19,7 +19,6 @@
     "http-server": "^0.12.3",
     "jest": "^26.4.0",
     "ts-jest": "^26.2.0",
-    "tslint": "6.1.1",
     "typedoc": "0.17.0",
     "typedoc-plugin-markdown": "2.2.17"
   },

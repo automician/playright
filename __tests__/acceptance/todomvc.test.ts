@@ -1,9 +1,6 @@
 import { stage, goto, element, elements, perform, have } from '../../lib';
 
 describe('Todomvc', () => {
-  beforeAll(async () => {
-    jasmine.DEFAULT_TIMEOUT_INTERVAL = 100000;
-  });
   afterAll(async () => {
     await stage.browser.close();
   });
