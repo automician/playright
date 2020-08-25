@@ -4,6 +4,7 @@ import { stage, goto, element } from '../../lib';
 
 describe('Ecosia', () => {
   afterAll(async () => {
+    jest.setTimeout(60 * 1000);
     await stage.browser.close();
   });
 
