@@ -35,7 +35,7 @@ export class Wait<T> {
     // TODO: consider accepting WaitOptions object instead
     entity: T,
     atMost: number,
-    orFailWith: (error: TimeoutError) => Promise<Error> = async (it) => it
+    orFailWith: (error: TimeoutError) => Promise<Error> = async (it) => it,
   ) {
     this.entity = entity;
     this.timeout = atMost;
@@ -66,21 +66,23 @@ export class Wait<T> {
 
     while (true) {
       try {
+        /* eslint-disable no-await-in-loop */
         const entity = await callable.call(this.entity);
         return entity;
       } catch (reason) {
         if (new Date().getTime() > finishTime) {
           const error = new TimeoutError(
-            '\n' +
-              `Timed out after ${this.timeout}ms, while waiting for:\n` +
-              `${this.entity}.${callable}\n` +
-              '\n' +
-              `Reason: ${reason.message}\n`
+            '\n'
+              + `Timed out after ${this.timeout}ms, while waiting for:\n`
+              + `${this.entity}.${callable}\n`
+              + '\n'
+              + `Reason: ${reason.message}\n`,
           );
           error.stack = syncStack;
 
           const handledError = await this.handleFailure(error);
           throw handledError;
+          /* eslint-enable no-await-in-loop */
         }
       }
     }
@@ -88,8 +90,8 @@ export class Wait<T> {
 
   async until<R>(callable: Callable<T, R>): Promise<boolean> {
     return this.for(callable).then(
-      (onSuccess) => true,
-      (onFailure) => false
+      () => true,
+      () => false,
     );
   }
 }

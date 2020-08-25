@@ -84,14 +84,13 @@ export class Condition<E> implements Callable<E, void> {
 
   matches(entity: E): Promise<boolean> {
     return this.call(entity).then(
-      (onSuccess) => true,
-      (onFailure) => false
+      () => true,
+      () => false,
     );
   }
 
   predicate(): Callable<E, boolean> {
-    const toString = this.toString;
-    const matches = this.matches;
+    const { toString, matches } = this;
     return {
       toString,
       call: matches,
@@ -101,10 +100,11 @@ export class Condition<E> implements Callable<E, void> {
   toString(): string {
     return this.description;
   }
-}
 
-export namespace Condition {
-  export function failIfNot<E>(description: string, predicate: (entity: E) => Promise<boolean>): Condition<E> {
+  static failIfNot<E>(
+      description: string,
+      predicate: (entity: E) => Promise<boolean>,
+  ): Condition<E> {
     return new Condition(description, async (entity: E) => {
       if (!(await predicate(entity))) {
         throw new ConditionNotMatchedError();
@@ -112,10 +112,10 @@ export namespace Condition {
     });
   }
 
-  export function failIfNotActual<E, A>(
+  static failIfNotActual<E, A>(
     description: string,
     query: Callable<E, A>, // TODO: what about accepting simple fn here?
-    predicate: (actual: A) => boolean
+    predicate: (actual: A) => boolean,
   ): Condition<E> {
     return new Condition(description, async (entity: E) => {
       const actual = await query.call(entity);
@@ -128,38 +128,37 @@ export namespace Condition {
   /**
    * Negates or inverts condition
    */
-  export const not = <T>(condition: Condition<T>, description?: string): Condition<T> => {
+  static not<T>(condition: Condition<T>, description?: string): Condition<T> {
     const [isOrHave, ...name] = condition.toString().split(' ');
-    const newDescription = `${isOrHave} ${'is' === isOrHave ? 'not' : 'no'} ${name.join(' ')}`;
+    const newDescription = `${isOrHave} ${isOrHave === 'is' ? 'not' : 'no'} ${name.join(' ')}`;
     // TODO: can we simplify this logic?
-    return new Condition(description || newDescription, (entity: T) =>
-      condition.call(entity).then(
-        (onSuccess) => {
-          throw new ConditionNotMatchedError();
-        },
-        (onFailure) => {
-          return;
-        }
-      )
-    );
-  };
+    return new Condition(description || newDescription, (entity: T) => condition.call(entity).then(
+      () => {
+        throw new ConditionNotMatchedError();
+      },
+      () => {},
+    ));
+  }
 
   /**
    * Combines conditions by logical AND
    */
-  export const and = <T>(...conditions: Condition<T>[]): Condition<T> =>
-    new Condition(conditions.map(toString).join(' and '), async (entity: T) => {
+  static and<T>(...conditions: Condition<T>[]): Condition<T> {
+    return new Condition(conditions.map(toString).join(' and '), async (entity: T) => {
+      // eslint-disable-next-line no-restricted-syntax
       for (const condition of conditions) {
         await condition.call(entity);
       }
     });
+  }
 
   /**
    * Combines conditions by logical OR
    */
-  export const or = <T>(...conditions: Condition<T>[]): Condition<T> =>
-    new Condition(conditions.map(toString).join(' or '), async (entity: T) => {
+  static or<T>(...conditions: Condition<T>[]): Condition<T> {
+    return new Condition(conditions.map(toString).join(' or '), async (entity: T) => {
       const errors: Error[] = [];
+      // eslint-disable-next-line no-restricted-syntax
       for (const condition of conditions) {
         try {
           await condition.call(entity);
@@ -170,17 +169,19 @@ export namespace Condition {
       }
       throw new Error(errors.map(toString).join('; '));
     });
+  }
 
   /**
    * Transforms Conditions, i.e. Matchers that return (void | throws Error),
    * combined by AND
    * to async Predicate that returns (true | false)
    */
-  export const asPredicate = <T>(...conditions: Condition<T>[]) => (entity: T): Promise<boolean> =>
-    Condition.and(...conditions)
+  static asPredicate<T>(...conditions: Condition<T>[]) {
+    return (entity: T): Promise<boolean> => Condition.and(...conditions)
       .call(entity)
       .then(
-        (_) => true,
-        (_) => false
+        () => true,
+        () => false,
       );
+  }
 }

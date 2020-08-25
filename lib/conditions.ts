@@ -33,27 +33,23 @@ export namespace match {
 
   export const visible = Condition.failIfNot(
     'is visible',
-    async (element: Element) => element.handle.then((it) => it.boundingBox() != null)
+    async (element: Element) => element.handle.then((it) => it.boundingBox() != null),
     // TODO: any better way to check for visibility?
   );
 
-  export const text = (expected: string | number | RegExp) =>
-    Condition.failIfNotActual(
-      `has text: ${expected}`,
-      query.text,
-      typeof expected === 'string' ? predicate.includes(expected) : predicate.matches(expected)
-    );
+  export const text = (expected: string | number | RegExp) => Condition.failIfNotActual(
+    `has text: ${expected}`,
+    query.text,
+    typeof expected === 'string' ? predicate.includes(expected) : predicate.matches(expected),
+  );
 
-  export const cssClass = (name: string) =>
-    Condition.failIfNotActual(`has css class '${name}'`, query.attribute('class'), predicate.includesWord(name));
+  export const cssClass = (name: string) => Condition.failIfNotActual(`has css class '${name}'`, query.attribute('class'), predicate.includesWord(name));
 
   /* --- elements collection conditions --- */
 
-  export const texts = (...values: string[] | number[]) =>
-    Condition.failIfNotActual(`have texts ${values}`, query.texts, predicate.equalsByContainsToArray(values));
+  export const texts = (...values: string[] | number[]) => Condition.failIfNotActual(`have texts ${values}`, query.texts, predicate.equalsByContainsToArray(values));
 
-  export const size = (size: number) =>
-    Condition.failIfNotActual(`have size ${size}`, query.count, predicate.equals(size));
+  export const size = (count: number) => Condition.failIfNotActual(`have size ${count}`, query.count, predicate.equals(count));
 }
 
 export namespace have {
@@ -63,7 +59,7 @@ export namespace have {
 
   export const texts = (...values: string[] | number[]) => match.texts(...values);
 
-  export const size = (size: number) => match.size(size);
+  export const size = (count: number) => match.size(count);
 
   export namespace no {
     export const text = (expected: string | number | RegExp) => match.text(expected).not;
@@ -77,7 +73,7 @@ export namespace have {
 }
 
 export namespace be {
-  export const visible = match.visible;
+  export const { visible } = match;
 
   export namespace not {
     export const visible = match.visible.not;

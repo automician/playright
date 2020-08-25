@@ -1,4 +1,3 @@
-import { elements } from './playright';
 // MIT License
 //
 // Copyright (c) 2020 Iakiv Kramarenko, Alexander Popov
@@ -25,6 +24,8 @@ import { elements } from './playright';
  * !!! Let's export as library API only "stable" in context of naming things;)
  */
 
-export { stage, goto, element, elements } from './playright';
+export {
+  stage, goto, element, elements,
+} from './playright';
 export { perform } from './commands';
 export { have, be } from './conditions';

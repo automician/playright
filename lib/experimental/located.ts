@@ -19,18 +19,16 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
-import { Stage, tryToGetPage } from '../playright';
 import * as driver from 'playwright';
+import { Stage, tryToGetPage, stage } from '../playright';
 import { Wait } from '../wait';
 import { Condition } from '../callables';
-import { stage } from '../playright';
 
-const $ = (selector: string) =>
-  new Located({
-    toString: () => `located by {${selector}}`,
-    first: () => tryToGetPage().$(selector),
-    all: () => tryToGetPage().$$(selector),
-  });
+const $ = (selector: string) => new Located({
+  toString: () => `located by {${selector}}`,
+  first: () => tryToGetPage().$(selector),
+  all: () => tryToGetPage().$$(selector),
+});
 
 /**
  * TODO: consider making first?: optional and generate impl as all()[0]
@@ -44,7 +42,7 @@ export interface Locator<R> {
 export class Located {
   constructor(
     private readonly find: Locator<driver.ElementHandle<HTMLOrSVGElement>>,
-    private readonly options?: LocatedOptions
+    private readonly options?: LocatedOptions,
   ) {
     this.find = find;
     this.options = options;
@@ -78,11 +76,11 @@ export class Located {
     options = {
       delay: 0,
       noWaitAfter: false,
-    }
+    },
   ): Promise<Located> {
-    this.wait.for({
+    await this.wait.for({
       toString: () => 'type',
-      call: async (_) => await (await this.find.first()).type(text, { ...options, timeout: 0 }),
+      call: async () => this.find.first().then((it) => it.type(text, { ...options, timeout: 0 })),
     });
     return this;
   }
@@ -95,15 +93,14 @@ export class Located {
    * but without timeout becuase we have our own waiting logic and timeout
    */
   async press(key: string, { delay = 0, noWaitAfter = false } = {}): Promise<Located> {
-    this.wait.for({
+    await this.wait.for({
       toString: () => 'type',
-      call: async (_) => await (await this.find.first()).press(key, { delay, noWaitAfter, timeout: 0 }),
+      call: async () => this.find.first().then((it) => it.press(key, { delay, noWaitAfter, timeout: 0 })),
     });
     return this;
   }
 
   /* --- Element search --- */
-
   $(selector: string): Located {
     // TODO: implement
     return this;

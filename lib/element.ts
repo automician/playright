@@ -31,7 +31,7 @@ import { Wait } from './wait';
 export class Element {
   constructor(
     private readonly find: Locator<driver.ElementHandle<Node>>,
-    private readonly options?: ElementOptions // TODO: should we just accept Stage here?
+    private readonly options?: ElementOptions, // TODO: should we just accept Stage here?
   ) {
     this.find = find;
     this.options = options;
@@ -96,7 +96,7 @@ export class Element {
     options = {
       delay: 0,
       noWaitAfter: false,
-    }
+    },
   ): Promise<Element> {
     await this.wait.for({
       toString: () => `type ${text}`,
@@ -147,20 +147,17 @@ export class Element {
     await this.wait.for({
       // TODO: log in toString options too in case they are not default
       toString: () => 'click',
-      call: async () =>
-        this.handle.then((handle) =>
-          handle.click({
-            // TODO: o_O not sure wtf so I need the workaround below...
-            button: buttonName === 'left' ? 'left' : buttonName === 'right' ? 'right' : 'middle',
-            clickCount,
-            delay,
-            position,
-            modifiers,
-            force,
-            noWaitAfter,
-            timeout: 0,
-          })
-        ),
+      call: async () => this.handle.then((handle) => handle.click({
+        // TODO: o_O not sure wtf so I need the workaround below...
+        button: buttonName === 'left' ? 'left' : buttonName === 'right' ? 'right' : 'middle',
+        clickCount,
+        delay,
+        position,
+        modifiers,
+        force,
+        noWaitAfter,
+        timeout: 0,
+      })),
     });
     return this;
   }
@@ -186,7 +183,9 @@ export class Element {
     await this.wait.for({
       // TODO: log in toString options too in case they are not default
       toString: () => 'hover',
-      call: async (_) => this.handle.then((handle) => handle.hover({ position, modifiers, force, timeout: 0 })),
+      call: async () => this.handle.then((handle) => handle.hover({
+        position, modifiers, force, timeout: 0,
+      })),
     });
     return this;
   }

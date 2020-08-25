@@ -20,8 +20,8 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-import { Stage, stage } from './playright';
 import * as driver from 'playwright';
+import { Stage, stage } from './playright';
 import { Wait } from './wait';
 import { Condition, Locator } from './callables';
 import { Element } from './element';
@@ -30,11 +30,11 @@ import { query } from './queries';
 /**
  * TODO: consider putting into Playright namespace
  */
-export class Elements /*implements AsyncIterable<Element>*/ {
+export class Elements /* implements AsyncIterable<Element> */ {
   // TODO: implement iterator
   constructor(
     private readonly find: Locator<driver.ElementHandle<Node>[]>,
-    private readonly options?: ElementsOptions // TODO: should we just accept Stage here?
+    private readonly options?: ElementsOptions, // TODO: should we just accept Stage here?
   ) {
     this.find = find;
     this.options = options;
@@ -73,14 +73,13 @@ export class Elements /*implements AsyncIterable<Element>*/ {
   get cached(): Promise<Elements> {
     const original = this;
     return this.handles.then(
-      (saved) =>
-        new Elements(
-          {
-            toString: () => original.toString(),
-            call: async () => saved,
-          },
-          original.options
-        )
+      (saved) => new Elements(
+        {
+          toString: () => original.toString(),
+          call: async () => saved,
+        },
+        original.options,
+      ),
     );
   }
 
@@ -89,39 +88,36 @@ export class Elements /*implements AsyncIterable<Element>*/ {
    */
   get cachedArray(): Promise<Element[]> {
     const original = this;
-    return this.handles.then((saved) =>
-      saved.map(
-        (handle, index) =>
-          new Element(
-            {
-              toString: () => `${original}[${index + 1}]`,
-              call: async () => handle,
-            },
-            original.options
-          )
-      )
-    );
+    return this.handles.then((saved) => saved.map(
+      (handle, index) => new Element(
+        {
+          toString: () => `${original}[${index + 1}]`,
+          call: async () => handle,
+        },
+        original.options,
+      ),
+    ));
   }
 
   /**
    *
-   * @param number_ number of element in elements collection starting from 1
+   * @param index number of element in elements collection starting from 1
    */
-  element(number_: number): Element {
+  element(index: number): Element {
     const collection = this;
     return new Element({
-      toString: () => `${collection}[${number_}]`,
-      async call() {
+      toString: () => `${collection}[${index}]`,
+      call: async () => {
         const actual = await collection.handles;
-        if (actual.length < number_) {
+        if (actual.length < index) {
           throw new Error(
-            `Cannot get element of number ${number_} ` + `from elements collection with length ${actual.length}`
+            `Cannot get element of number ${index} from elements collection with length ${actual.length}`,
           );
           // TODO: do we need to print the whole collection here?
           //       probably with stage option to limit number of
           //       elements to log
         }
-        return actual[number_ - 1];
+        return actual[index - 1];
       },
     });
   }
@@ -136,6 +132,7 @@ export class Elements /*implements AsyncIterable<Element>*/ {
       toString: () => `${collection}.firstBy(${condition})`,
       async call() {
         const cached = await collection.cachedArray;
+        // eslint-disable-next-line no-restricted-syntax
         for (const element of cached) {
           if (await condition.matches(element)) {
             return element.handle;
@@ -143,13 +140,12 @@ export class Elements /*implements AsyncIterable<Element>*/ {
         }
 
         const outerHTMLs: string[] = [];
+        // eslint-disable-next-line no-restricted-syntax
         for (const element of cached) {
           outerHTMLs.push(await query.outerHtml.call(element));
         }
 
-        throw new Error(
-          `Cannot find element by condition «${condition}» ` + `from elements collection:\n[${outerHTMLs}]`
-        );
+        throw new Error(`Cannot find element by condition «${condition}» from elements collection:\n[${outerHTMLs}]`);
       },
     });
   }
@@ -160,7 +156,9 @@ export class Elements /*implements AsyncIterable<Element>*/ {
       toString: () => `${collection}.by(${condition})`,
       async call() {
         const filtered: driver.ElementHandle<Node>[] = [];
-        for (const element of await collection.cachedArray) {
+        const cachedArray = await collection.cachedArray;
+        // eslint-disable-next-line no-restricted-syntax
+        for (const element of cachedArray) {
           if (await condition.matches(element)) {
             filtered.push(await element.handle);
           }

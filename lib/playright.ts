@@ -20,9 +20,8 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-import { Url } from './utils';
 import * as driver from 'playwright';
-import { Condition } from './callables';
+import { Url } from './utils';
 import { Element } from './element';
 import { Elements } from './elements';
 import { Wait } from './wait';
@@ -145,14 +144,12 @@ export const tryToGetPage: () => driver.Page | never = () => {
   return stage.page;
 };
 
-export const element = (selector: string) =>
-  new Element({
-    toString: () => `element(${selector})`,
-    call: () => tryToGetPage().$(selector),
-  });
+export const element = (selector: string) => new Element({
+  toString: () => `element(${selector})`,
+  call: () => tryToGetPage().$(selector),
+});
 
-export const elements = (selector: string) =>
-  new Elements({
-    toString: () => `elements(${selector})`,
-    call: () => tryToGetPage().$$(selector),
-  });
+export const elements = (selector: string) => new Elements({
+  toString: () => `elements(${selector})`,
+  call: () => tryToGetPage().$$(selector),
+});

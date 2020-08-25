@@ -21,10 +21,6 @@
 // SOFTWARE.
 
 export class TimeoutError extends Error {
-  constructor(message?: string) {
-    super(message);
-  }
-
   toString() {
     const exceptionMsg = `Message: ${this.message}\n`;
     return exceptionMsg;
