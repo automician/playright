@@ -29,7 +29,10 @@ import { Wait } from './wait';
 import { Stage } from './stage';
 
 export class Director { // TODO: should we implement StageOptions?
-  private _stage: Stage;
+  private _stage: Stage; // TODO: should we made it public?
+  // to provide kind of one entry point through director.* to all "managed API"
+  // yet we have this.browser, this.context, this.page ... but they are async...
+  // should we make them sync? then we don't need to make stage public....
 
   /* TODO: should we keep main _stage as _spawned[0]
   get _stage() {
@@ -148,6 +151,18 @@ export class Director { // TODO: should we implement StageOptions?
     }
     this.assign({ browser: null, context: null, page: null });
   }
+
+  /*
+   * TODO: should we actually make director.browser & co be sync and mapped to this._stage.browser
+   * same for context and page ?
+   * and then... have another async methods for actual spawning of browser, context, page ?
+   * maybe called async initBrowser(), async initContext(), async initPage
+   * an so be consistent with async init() that actually spans all of them...
+   * then normal this.browser mapped to this._stage.browser
+   * can be a getter that in case of null throws error with readable:
+   * 'you should call .init() first', etc...
+   * this by the way may be relevant to question "make this.stage public or not?"
+   */
 
   get browser(): Promise<driver.Browser> {
     return this._stage.browser ? Promise.resolve(this._stage.browser)

@@ -1,3 +1,4 @@
+/* eslint-disable no-shadow */
 // MIT License
 //
 // Copyright (c) 2020 Iakiv Kramarenko, Alexander Popov
@@ -33,7 +34,7 @@ export namespace match {
 
   export const visible = Condition.failIfNot(
     'is visible',
-    async (element: Element) => element.handle.then((it) => it.boundingBox() != null),
+    async (element: Element) => element.handle.then(it => it.boundingBox() != null),
     // TODO: any better way to check for visibility?
   );
 
@@ -49,7 +50,7 @@ export namespace match {
 
   export const texts = (...values: string[] | number[]) => Condition.failIfNotActual(`have texts ${values}`, query.texts, predicate.equalsByContainsToArray(values));
 
-  export const size = (count: number) => Condition.failIfNotActual(`have size ${count}`, query.count, predicate.equals(count));
+  export const count = (num: number) => Condition.failIfNotActual(`have size ${num}`, query.count, predicate.equals(num));
 }
 
 export namespace have {
@@ -59,7 +60,7 @@ export namespace have {
 
   export const texts = (...values: string[] | number[]) => match.texts(...values);
 
-  export const size = (count: number) => match.size(count);
+  export const count = (num: number) => match.count(num);
 
   export namespace no {
     export const text = (expected: string | number | RegExp) => match.text(expected).not;
@@ -68,7 +69,7 @@ export namespace have {
 
     export const texts = (...values: string[] | number[]) => match.texts(...values).not;
 
-    export const size = (size: number) => match.size(size).not;
+    export const count = (num: number) => match.count(num).not;
   }
 }
 

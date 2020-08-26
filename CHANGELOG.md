@@ -11,12 +11,17 @@
 ## 0.0.next
 - TBD
 
-## 0.0.7
+## 0.0.8 (to be released on 2020.08.??)
+- renamed have.size to have.count
+- refactored from stage to Stage & Director
+  - TBD: ...
+
+## 0.0.7 (released on 2020.08.20)
 - fix element and elements toString
 - fix missing async/awaits
 - make `goto` waitable
 
-## 0.0.6
+## 0.0.6 (sipped)
 - added elements to lib index.ts
 - tuned project setup
   - switch from jasmine to jest
