@@ -1,10 +1,10 @@
-import { perform } from './../../lib/commands';
-import { stage, director, goto, element } from '../../lib';
+import { stage, director, goto, element, perform } from '../../lib';
 
 describe('Ecosia', () => {
   beforeAll(async() => {
     jest.setTimeout(60 * 1000);
-    director.assign({ launchOptions: { headless: false } });
+    /* the following is true by default */
+    // director.assign({ launchOptions: { headless: false } });
   })
   afterAll(async () => {
     await director.dispose();

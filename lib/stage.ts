@@ -87,4 +87,11 @@ export class Stage implements StageOptions {
       call: () => this.page.$$(selector),
     }, this);
   }
+
+  /* TODO: should we keep Stage fully sync, or should we add just one async goto?
+   * at least to simplify usage like stage.page.goto(...) ?
+  async goto(relativeOrAbsoluteUrl: string) {
+    // ...
+  }
+   */
 }
