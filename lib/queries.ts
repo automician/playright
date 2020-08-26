@@ -47,13 +47,13 @@ export namespace query {
 
   export const text: Callable<Element, string> = {
     toString: () => 'text',
-    call: (element) => element.handle.then((its) => its.innerText()),
+    call: element => element.handle.then(its => its.innerText()),
   };
 
   export function attribute(name: string): Callable<Element, string> {
     return {
       toString: () => `attribute ${name}`,
-      call: (element) => element.handle.then((its) => its.getAttribute(name)),
+      call: element => element.handle.then(its => its.getAttribute(name)),
     };
   }
 
@@ -63,7 +63,7 @@ export namespace query {
 
   export const count: Callable<Elements, number> = {
     toString: () => 'count',
-    call: (elements) => elements.handles.then((their) => their.length),
+    call: elements => elements.handles.then(their => their.length),
   };
 
   // TODO: do we need this alias?
@@ -71,6 +71,6 @@ export namespace query {
 
   export const texts: Callable<Elements, string[]> = {
     toString: () => 'texts',
-    call: async (elements) => Promise.all((await elements.handles).map((its) => its.innerText())),
+    call: async elements => Promise.all((await elements.handles).map(its => its.innerText())),
   };
 }

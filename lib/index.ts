@@ -22,10 +22,11 @@
 
 /**
  * !!! Let's export as library API only "stable" in context of naming things;)
+ * hehe, though everyting exported below from ./playright is not stable at all:)
  */
 
 export {
-  stage, goto, element, elements,
+  stage, director, goto, element, elements,
 } from './playright';
 export { perform } from './commands';
 export { have, be } from './conditions';

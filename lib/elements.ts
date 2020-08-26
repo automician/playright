@@ -21,7 +21,7 @@
 // SOFTWARE.
 
 import * as driver from 'playwright';
-import { Stage, stage } from './playright';
+import { StageOptions } from './stageOptions';
 import { Wait } from './wait';
 import { Condition, Locator } from './callables';
 import { Element } from './element';
@@ -34,7 +34,8 @@ export class Elements /* implements AsyncIterable<Element> */ {
   // TODO: implement iterator
   constructor(
     private readonly find: Locator<driver.ElementHandle<Node>[]>,
-    private readonly options?: ElementsOptions, // TODO: should we just accept Stage here?
+    private readonly options: StageOptions, // TODO: rename to stage?
+    // TODO: should we just accept Stage here?
   ) {
     this.find = find;
     this.options = options;
@@ -60,12 +61,12 @@ export class Elements /* implements AsyncIterable<Element> */ {
    * TODO: think on proper name...
    * at? with? in? of? ... etc?
    */
-  when(options: ElementsOptions): Elements {
+  when(options: StageOptions): Elements {
     return new Elements(this.find, options);
   }
 
   get wait(): Wait<Elements> {
-    return new Wait(this, stage.timeout);
+    return new Wait(this, this.options.timeout);
   } // $('.item').wait.for({call})
 
   /* --- Locating --- */
@@ -73,7 +74,7 @@ export class Elements /* implements AsyncIterable<Element> */ {
   get cached(): Promise<Elements> {
     const original = this;
     return this.handles.then(
-      (saved) => new Elements(
+      saved => new Elements(
         {
           toString: () => original.toString(),
           call: async () => saved,
@@ -88,7 +89,7 @@ export class Elements /* implements AsyncIterable<Element> */ {
    */
   get cachedArray(): Promise<Element[]> {
     const original = this;
-    return this.handles.then((saved) => saved.map(
+    return this.handles.then(saved => saved.map(
       (handle, index) => new Element(
         {
           toString: () => `${original}[${index + 1}]`,
@@ -119,7 +120,7 @@ export class Elements /* implements AsyncIterable<Element> */ {
         }
         return actual[index - 1];
       },
-    });
+    }, this.options);
   }
 
   get first(): Element {
@@ -147,7 +148,7 @@ export class Elements /* implements AsyncIterable<Element> */ {
 
         throw new Error(`Cannot find element by condition «${condition}» from elements collection:\n[${outerHTMLs}]`);
       },
-    });
+    }, this.options);
   }
 
   by(condition: Condition<Element>): Elements {
@@ -165,7 +166,7 @@ export class Elements /* implements AsyncIterable<Element> */ {
         }
         return filtered;
       },
-    });
+    }, this.options);
   }
 
   /* --- Assertable --- */
@@ -179,13 +180,3 @@ export class Elements /* implements AsyncIterable<Element> */ {
     return this.find.toString();
   }
 }
-
-/**
- * TODO: should we narrow all Stage to a smaller group of options
- *       relevant only for the Element contexts?
- *
- * probably it's good to break things down...
- * we can have separate smaller ElementOptions and then merge them into Stage
- * like stage = {...elementOptions, ...}
- */
-export interface ElementsOptions extends Stage {}

@@ -22,7 +22,7 @@
 
 import * as driver from 'playwright';
 import { Condition, Locator } from './callables';
-import { Stage, stage } from './playright';
+import { StageOptions } from './stageOptions';
 import { Wait } from './wait';
 
 /**
@@ -31,7 +31,8 @@ import { Wait } from './wait';
 export class Element {
   constructor(
     private readonly find: Locator<driver.ElementHandle<Node>>,
-    private readonly options?: ElementOptions, // TODO: should we just accept Stage here?
+    private readonly options: StageOptions,
+    // TODO: should we just accept Stage above?
   ) {
     this.find = find;
     this.options = options;
@@ -40,7 +41,7 @@ export class Element {
   /* --- Located --- */
 
   get handle(): Promise<driver.ElementHandle<Node>> {
-    return this.find.call().then((handle) => {
+    return this.find.call().then(handle => {
       if (handle === null) {
         throw new Error('element was not found');
       }
@@ -54,7 +55,7 @@ export class Element {
    * TODO: think on proper name...
    * at? with? in? of? ... etc?
    */
-  when(options: ElementOptions): Element {
+  when(options: StageOptions): Element {
     return new Element(this.find, options);
   }
 
@@ -63,14 +64,14 @@ export class Element {
   element(selector: string): Element {
     return new Element({
       toString: () => `${this}.element(${selector})`,
-      call: async () => this.handle.then((handle) => handle.$(selector)),
-    });
+      call: async () => this.handle.then(handle => handle.$(selector)),
+    }, this.options);
   }
 
   /* --- Waiting --- */
 
   get wait(): Wait<Element> {
-    return new Wait(this, stage.timeout);
+    return new Wait(this, this.options.timeout);
   } // $('.item').wait.for({call})
 
   /* --- Assertable --- */
@@ -100,7 +101,7 @@ export class Element {
   ): Promise<Element> {
     await this.wait.for({
       toString: () => `type ${text}`,
-      call: async () => this.handle.then((handle) => handle.type(text, { ...options, timeout: 0 })),
+      call: async () => this.handle.then(its => its.type(text, { ...options, timeout: 0 })),
     });
     return this;
   }
@@ -114,7 +115,7 @@ export class Element {
   async fill(value: string, { noWaitAfter = false } = {}): Promise<Element> {
     await this.wait.for({
       toString: () => `fill ${value}`,
-      call: async () => this.handle.then((handle) => handle.fill(value, { noWaitAfter, timeout: 0 })),
+      call: async () => this.handle.then(its => its.fill(value, { noWaitAfter, timeout: 0 })),
     });
     return this;
   }
@@ -129,7 +130,7 @@ export class Element {
   async press(key: string, { delay = 0, noWaitAfter = false } = {}): Promise<Element> {
     await this.wait.for({
       toString: () => `press ${key}`,
-      call: async () => this.handle.then((handle) => handle.press(key, { delay, noWaitAfter, timeout: 0 })),
+      call: async () => this.handle.then(its => its.press(key, { delay, noWaitAfter, timeout: 0 })),
     });
     return this;
   }
@@ -147,8 +148,9 @@ export class Element {
     await this.wait.for({
       // TODO: log in toString options too in case they are not default
       toString: () => 'click',
-      call: async () => this.handle.then((handle) => handle.click({
+      call: async () => this.handle.then(its => its.click({
         // TODO: o_O not sure wtf so I need the workaround below...
+        // eslint-disable-next-line no-nested-ternary
         button: buttonName === 'left' ? 'left' : buttonName === 'right' ? 'right' : 'middle',
         clickCount,
         delay,
@@ -183,7 +185,7 @@ export class Element {
     await this.wait.for({
       // TODO: log in toString options too in case they are not default
       toString: () => 'hover',
-      call: async () => this.handle.then((handle) => handle.hover({
+      call: async () => this.handle.then(its => its.hover({
         position, modifiers, force, timeout: 0,
       })),
     });
@@ -194,13 +196,3 @@ export class Element {
     return this.find.toString();
   }
 }
-
-/**
- * TODO: should we narrow all Stage to a smaller group of options
- *       relevant only for the Element contexts?
- *
- * probably it's good to break things down...
- * we can have separate smaller ElementOptions and then merge them into Stage
- * like stage = {...elementOptions, ...}
- */
-export interface ElementOptions extends Stage {}

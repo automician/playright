@@ -1,11 +1,13 @@
-import { tryToGetPage } from './../../lib/playright';
 import { perform } from './../../lib/commands';
-import { stage, goto, element } from '../../lib';
+import { stage, director, goto, element } from '../../lib';
 
 describe('Ecosia', () => {
-  afterAll(async () => {
+  beforeAll(async() => {
     jest.setTimeout(60 * 1000);
-    await stage.browser.close();
+    director.assign({ launchOptions: { headless: false } });
+  })
+  afterAll(async () => {
+    await director.dispose();
   });
 
   it('should search', async () => {
@@ -20,7 +22,7 @@ describe('Ecosia', () => {
 
     await query.type('github yashaka selene').then(perform.press('Enter'));
 
-    await tryToGetPage().waitForTimeout(4000);
+    await stage.page.waitForTimeout(4000);
 
     // await element('[name=q]').type('github yashaka selene')
     //     .then(perform.press('Enter'));

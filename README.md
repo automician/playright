@@ -33,19 +33,20 @@ TBD
 ### Quick Start
 
 ```typescript
-import { stage, goto, element, elements, perform, have } from 'playright'
+import { director, goto, element, elements, perform, have, stage } from '../../lib';
 
 describe('Todomvc', () => {
-    
-  beforeAll(async () => {
-    jasmine.DEFAULT_TIMEOUT_INTERVAL = 100000;
-  });
-
+  beforeAll(async() => {
+    jest.setTimeout(60 * 1000);
+    director.assign({ launchOptions: { headless: false} });
+  })
   afterAll(async () => {
-    await stage.browser.close();
+    await director.dispose();
   });
 
-  fit('should complete todo', async () => {
+  it('should complete todo', async () => {
+    // TODO: the following somehow does not work... why?
+    // stage.launchOptions = {...stage.launchOptions, slowMo: 1000};
 
     await goto('http://todomvc.com/examples/emberjs');
 
@@ -57,13 +58,12 @@ describe('Todomvc', () => {
 
     await elements('#todo-list li').first.element('.toggle').click();
     await elements('#todo-list li').element(2).element('.toggle').click();
-    await elements('#todo-list li').firstBy(have.text('d'))
-        .element('.toggle').click();
-    await elements('#todo-list li').by(have.cssClass('completed'))
-    .should(have.texts('a', 'b', 'd'))
-    await elements('#todo-list li').by(have.no.cssClass('completed'))
-        .should(have.texts('c'))
-  })
+    await elements('#todo-list li').firstBy(have.text('d')).element('.toggle').click();
+    await elements('#todo-list li').by(have.cssClass('completed')).should(have.texts('a', 'b', 'd'));
+    await elements('#todo-list li').by(have.no.cssClass('completed')).should(have.texts('c'));
+
+    await stage.page.waitForTimeout(4000);
+  });
 });
 ```
 
