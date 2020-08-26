@@ -23,9 +23,10 @@
 import * as driver from 'playwright';
 import { Element } from './element';
 import { Elements } from './elements';
-import { Stage, StageOptions } from './stage';
+import { StageOptions } from './stageOptions';
 import { Url } from './utils';
 import { Wait } from './wait';
+import { Stage } from './stage';
 
 export class Director { // TODO: should we implement StageOptions?
   private _stage: Stage;
