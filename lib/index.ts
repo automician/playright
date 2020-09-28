@@ -20,13 +20,9 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-/**
- * !!! Let's export as library API only "stable" in context of naming things;)
- * hehe, though everyting exported below from ./playright is not stable at all:)
- */
-
-export {
-  stage, director, goto, element, elements,
-} from './playright';
 export { perform } from './commands';
 export { have, be } from './conditions';
+
+export { Element } from './element';
+export { Elements } from './elements';
+export { Stage } from './stage';

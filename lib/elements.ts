@@ -20,49 +20,27 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-import * as driver from 'playwright';
-import { StageOptions } from './stageOptions';
+import * as playwright from 'playwright';
+import { Configuration } from './configuraton';
 import { Wait } from './wait';
 import { Condition, Locator } from './callables';
 import { Element } from './element';
 import { query } from './queries';
 
-/**
- * TODO: consider putting into Playright namespace
- */
-export class Elements /* implements AsyncIterable<Element> */ {
-  // TODO: implement iterator
+export class Elements {
   constructor(
-    private readonly find: Locator<driver.ElementHandle<Node>[]>,
-    private readonly options: StageOptions, // TODO: rename to stage?
-    // TODO: should we just accept Stage here?
+    private readonly options: Configuration,
+    private readonly find: Locator<playwright.ElementHandle<Node>[]>,
   ) {
-    this.find = find;
     this.options = options;
+    this.find = find;
   }
-
-  // [Symbol.asyncIterator](): AsyncIterator<Element, any, undefined> {
-  //     return {
-  //         next(value?: any): Promise<IteratorResult<T>>;
-  //         return?(value?: any): Promise<IteratorResult<T>>;
-  //         throw?(e?: any): Promise<IteratorResult<T>>;
-  //     }
-  // }
 
   /* --- Located --- */
 
-  get handles(): Promise<driver.ElementHandle<Node>[]> {
-    return this.find.call();
-  }
-
-  /* --- Context-driven --- */
-
-  /**
-   * TODO: think on proper name...
-   * at? with? in? of? ... etc?
-   */
-  when(options: StageOptions): Elements {
-    return new Elements(this.find, options);
+  async handles(): Promise<playwright.ElementHandle<Node>[]> {
+    const result = await this.find.call();
+    return result;
   }
 
   get wait(): Wait<Elements> {
@@ -71,102 +49,82 @@ export class Elements /* implements AsyncIterable<Element> */ {
 
   /* --- Locating --- */
 
-  get cached(): Promise<Elements> {
-    const original = this;
-    return this.handles.then(
-      saved => new Elements(
-        {
-          toString: () => original.toString(),
-          call: async () => saved,
-        },
-        original.options,
-      ),
-    );
+  async cached(): Promise<Elements> {
+    return new Elements(this.options, {
+      toString: () => this.toString(),
+      call: () => this.handles(),
+    });
   }
 
-  /**
-   * TODO: implement proper async iterator and remove this method
-   */
-  get cachedArray(): Promise<Element[]> {
-    const original = this;
-    return this.handles.then(saved => saved.map(
-      (handle, index) => new Element(
-        {
-          toString: () => `${original}[${index + 1}]`,
-          call: async () => handle,
-        },
-        original.options,
-      ),
-    ));
+  async cachedArray(): Promise<Element[]> {
+    const handles = await this.handles();
+    return handles.map(
+      (handle, index) => new Element(this.options, {
+        toString: () => `${this}[${index}]`,
+        call: async () => handle,
+      }),
+    );
   }
 
   /**
    *
    * @param index number of element in elements collection starting from 1
    */
-  element(index: number): Element {
-    const collection = this;
-    return new Element({
-      toString: () => `${collection}[${index}]`,
+  $(index: number): Element {
+    return new Element(this.options, {
+      toString: () => `${this}[${index}]`,
       call: async () => {
-        const actual = await collection.handles;
-        if (actual.length < index) {
+        const actual = await this.handles();
+        if (actual.length <= index) {
           throw new Error(
-            `Cannot get element of number ${index} from elements collection with length ${actual.length}`,
+            `Cannot get element with index ${index} from elements collection with length ${actual.length}`,
           );
-          // TODO: do we need to print the whole collection here?
-          //       probably with stage option to limit number of
-          //       elements to log
         }
-        return actual[index - 1];
+        return actual[index];
       },
-    }, this.options);
+    });
   }
 
   get first(): Element {
-    return this.element(1);
+    return this.$(0);
   }
 
   firstBy(condition: Condition<Element>): Element {
-    const collection = this;
-    return new Element({
-      toString: () => `${collection}.firstBy(${condition})`,
-      async call() {
-        const cached = await collection.cachedArray;
+    return new Element(this.options, {
+      toString: () => `${this}.firstBy(${condition})`,
+      call: async () => {
+        const cached = await this.cachedArray();
         // eslint-disable-next-line no-restricted-syntax
         for (const element of cached) {
           if (await condition.matches(element)) {
-            return element.handle;
+            return element.handle();
           }
         }
-
         const outerHTMLs: string[] = [];
         // eslint-disable-next-line no-restricted-syntax
         for (const element of cached) {
           outerHTMLs.push(await query.outerHtml.call(element));
         }
-
         throw new Error(`Cannot find element by condition «${condition}» from elements collection:\n[${outerHTMLs}]`);
       },
-    }, this.options);
+    });
   }
 
   by(condition: Condition<Element>): Elements {
-    const collection = this;
-    return new Elements({
-      toString: () => `${collection}.by(${condition})`,
-      async call() {
-        const filtered: driver.ElementHandle<Node>[] = [];
-        const cachedArray = await collection.cachedArray;
+    return new Elements(this.options, {
+      toString: () => `${this}.by(${condition})`,
+      call: async () => {
+        const filtered: playwright.ElementHandle<Node>[] = [];
+        const cachedArray = await this.cachedArray();
         // eslint-disable-next-line no-restricted-syntax
         for (const element of cachedArray) {
           if (await condition.matches(element)) {
-            filtered.push(await element.handle);
+            filtered.push(await element.handle());
           }
         }
         return filtered;
       },
-    }, this.options);
+    });
   }
 
   /* --- Assertable --- */

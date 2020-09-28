@@ -20,78 +20,40 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-import * as driver from 'playwright';
 import { Element } from './element';
 import { Elements } from './elements';
-import { StageOptions } from './stageOptions';
+import { Configuration } from './configuraton';
+import { Wait } from './wait';
 
-export class Stage implements StageOptions {
-  // TODO: is inheritance ok below? should we change naming somehow?
+export class Stage {
+  readonly options: Configuration;
 
-  static withChromiumHeadless = new Stage({
-    browserName: 'chromium',
-    launchOptions: { headless: true },
-    contextOptions: {},
-    baseUrl: '',
-    timeout: 4000, // TODO: should we name it like elementsTimeout?
-  });
+  readonly wait: Wait<Stage>;
 
-  // TODO: it's a pity we have to repeat many of them here
-  //       while they are defined in StageOptions tha we implement...
-  browser?: driver.Browser;
-
-  browserName: string;
-
-  launchOptions: driver.LaunchOptions;
-
-  context?: driver.BrowserContext;
-
-  contextOptions: driver.BrowserContextOptions;
-
-  page: driver.Page;
-
-  baseUrl?: string;
-
-  timeout: number;
-
-  private constructor(options: StageOptions) {
-    Object.assign(this, options);
+  constructor(options: Configuration) {
+    this.options = options;
+    this.wait = new Wait(this, this.options.timeout);
   }
 
-  clone(options: StageOptions): Stage {
-    /* TODO: not sure about name
-     * .with? .at? .on? .for? .clone?
-     * if named as `with`
-     * stage.with({browser: customBrowserInstance}) sounds like it will override
-     * existing stage browser, not return new stage with overriden browser...
-     */
-    return new Stage({ ...this, ...options });
+  async goto(absoluteOrRelativeUrl: string) {
+    const url = this.options.baseUrl ? `${this.options.baseUrl}${absoluteOrRelativeUrl}` : absoluteOrRelativeUrl;
+    await this.wait.for({
+      toString: () => `goto ${url}`,
+      call: async () => this.options.page.goto(url),
+    });
   }
 
-  assign(options: StageOptions): Stage {
-    /* TODO: do we even need it? should we name it as .set ? or with?
-     */
-    return Object.assign(this, options);
+  $(selector: string) {
+    return new Element(this.options, {
+      toString: () => `$(${selector})`,
+      call: () => this.options.page.$(selector),
+    });
   }
 
-  element(selector: string) {
-    return new Element({
-      toString: () => `element(${selector})`,
-      call: () => this.page.$(selector),
-    }, this);
+  $$(selector: string) {
+    return new Elements(this.options, {
+      toString: () => `$$(${selector})`,
+      call: () => this.options.page.$$(selector),
+    });
   }
-
-  elements(selector: string) {
-    return new Elements({
-      toString: () => `elements(${selector})`,
-      call: () => this.page.$$(selector),
-    }, this);
-  }
-
-  /* TODO: should we keep Stage fully sync, or should we add just one async goto?
-   * at least to simplify usage like stage.page.goto(...) ?
-  async goto(relativeOrAbsoluteUrl: string) {
-    // ...
-  }
-   */
 }

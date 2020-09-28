@@ -35,7 +35,7 @@ export class Wait<T> {
     // TODO: consider accepting WaitOptions object instead
     entity: T,
     atMost: number,
-    orFailWith: (error: TimeoutError) => Promise<Error> = async (it) => it,
+    orFailWith: (error: TimeoutError) => Promise<Error> = async it => it,
   ) {
     this.entity = entity;
     this.timeout = atMost;

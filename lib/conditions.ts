@@ -26,17 +26,16 @@ import { query } from './queries';
 import { Condition } from './callables';
 import { Element } from './element';
 
+// TODO: do we need this match namespace?
 export namespace match {
-  // TODO: do we need this match namespace?
-
   /* --- element conditions --- */
   // TODO: do we need a nested namespace? like match.element.isVisible ?
 
-  export const visible = Condition.failIfNot(
-    'is visible',
-    async (element: Element) => element.handle.then(it => it.boundingBox() != null),
-    // TODO: any better way to check for visibility?
-  );
+  export const visible = Condition.failIfNot('is visible', async (element: Element) => {
+    const handle = await element.handle();
+    const box = await handle.boundingBox();
+    return box !== null;
+  });
 
   export const text = (expected: string | number | RegExp) => Condition.failIfNotActual(
     `has text: ${expected}`,
@@ -44,7 +43,18 @@ export namespace match {
     typeof expected === 'string' ? predicate.includes(expected) : predicate.matches(expected),
   );
 
+  export const exactText = (expected: string | number | RegExp) => Condition.failIfNotActual(
+    `has exact text: ${expected}`,
+    query.text,
+    typeof expected === 'string' ? predicate.equals(expected) : predicate.matches(expected),
+  );
+
   export const cssClass = (name: string) => Condition.failIfNotActual(`has css class '${name}'`, query.attribute('class'), predicate.includesWord(name));
+
+  export const element = (locator: string) => Condition.failIfNot(`has element "${locator}"`, async (element: Element) => element
+    .$(locator)
+    .handle()
+    .then(it => it !== null));
 
   /* --- elements collection conditions --- */
 
@@ -54,13 +64,17 @@ export namespace match {
 }
 
 export namespace have {
-  export const text = (expected: string | number | RegExp) => match.text(expected);
+  export const { text } = match;
 
-  export const cssClass = (name: string) => match.cssClass(name);
+  export const { exactText } = match;
 
-  export const texts = (...values: string[] | number[]) => match.texts(...values);
+  export const { cssClass } = match;
 
-  export const count = (num: number) => match.count(num);
+  export const { texts } = match;
+
+  export const { count } = match;
+
+  export const { element } = match;
 
   export namespace no {
     export const text = (expected: string | number | RegExp) => match.text(expected).not;

@@ -22,60 +22,58 @@
 
 import * as driver from 'playwright';
 import { Condition, Locator } from './callables';
-import { StageOptions } from './stageOptions';
+import { Configuration } from './configuraton';
 import { Wait } from './wait';
+import { Elements } from './elements';
 
 /**
  * TODO: consider putting into Playright namespace
  */
 export class Element {
-  constructor(
-    private readonly find: Locator<driver.ElementHandle<Node>>,
-    private readonly options: StageOptions,
-    // TODO: should we just accept Stage above?
-  ) {
-    this.find = find;
+  constructor(readonly options: Configuration, private readonly find: Locator<driver.ElementHandle<Node>>) {
     this.options = options;
+    this.find = find;
   }
 
   /* --- Located --- */
 
-  get handle(): Promise<driver.ElementHandle<Node>> {
-    return this.find.call().then(handle => {
-      if (handle === null) {
-        throw new Error('element was not found');
-      }
-      return handle;
-    });
-  }
-
-  /* --- Context-driven --- */
-
-  /**
-   * TODO: think on proper name...
-   * at? with? in? of? ... etc?
-   */
-  when(options: StageOptions): Element {
-    return new Element(this.find, options);
+  async handle(): Promise<driver.ElementHandle<Node>> {
+    const handle = await this.find.call();
+    if (handle === null) {
+      throw new Error('element was not found');
+    }
+    return handle;
   }
 
   /* --- Locating --- */
+  $(selector: string): Element {
+    return new Element(this.options, {
+      toString: () => `${this}.$(${selector})`,
+      call: async () => {
+        const element = await this.handle();
+        const result = await element.$(selector);
+        return result;
+      },
+    });
+  }
 
-  element(selector: string): Element {
-    return new Element({
-      toString: () => `${this}.element(${selector})`,
-      call: async () => this.handle.then(handle => handle.$(selector)),
-    }, this.options);
+  $$(selector: string): Elements {
+    return new Elements(this.options, {
+      toString: () => `${this}.$$(${selector})`,
+      call: async () => {
+        const element = await this.handle();
+        const result = await element.$$(selector);
+        return result;
+      },
+    });
   }
 
   /* --- Waiting --- */
-
   get wait(): Wait<Element> {
     return new Wait(this, this.options.timeout);
   } // $('.item').wait.for({call})
 
   /* --- Assertable --- */
-
   async should(condition: Condition<Element>): Promise<Element> {
     await this.wait.for(condition);
     return this;
@@ -101,7 +99,7 @@ export class Element {
   ): Promise<Element> {
     await this.wait.for({
       toString: () => `type ${text}`,
-      call: async () => this.handle.then(its => its.type(text, { ...options, timeout: 0 })),
+      call: async () => this.handle().then(its => its.type(text, { ...options, timeout: 5000 })),
     });
     return this;
   }
@@ -115,7 +113,21 @@ export class Element {
   async fill(value: string, { noWaitAfter = false } = {}): Promise<Element> {
     await this.wait.for({
       toString: () => `fill ${value}`,
-      call: async () => this.handle.then(its => its.fill(value, { noWaitAfter, timeout: 0 })),
+      call: async () => {
+        const handle = await this.handle();
+        await handle.fill(value, { noWaitAfter, timeout: 1000 });
+      },
+    });
+    return this;
+  }
+
+  async setValue(value: string): Promise<Element> {
+    await this.wait.for({
+      toString: () => `set value ${value}`,
+      call: async () => {
+        await this.click({ clickCount: 3 });
+        await this.fill(value);
+      },
     });
     return this;
   }
@@ -130,7 +142,7 @@ export class Element {
   async press(key: string, { delay = 0, noWaitAfter = false } = {}): Promise<Element> {
     await this.wait.for({
       toString: () => `press ${key}`,
-      call: async () => this.handle.then(its => its.press(key, { delay, noWaitAfter, timeout: 0 })),
+      call: async () => this.handle().then(its => its.press(key, { delay, noWaitAfter, timeout: 1000 })),
     });
     return this;
   }
@@ -148,7 +160,7 @@ export class Element {
     await this.wait.for({
       // TODO: log in toString options too in case they are not default
       toString: () => 'click',
-      call: async () => this.handle.then(its => its.click({
+      call: async () => this.handle().then(its => its.click({
         // TODO: o_O not sure wtf so I need the workaround below...
         // eslint-disable-next-line no-nested-ternary
         button: buttonName === 'left' ? 'left' : buttonName === 'right' ? 'right' : 'middle',
@@ -158,7 +170,7 @@ export class Element {
         modifiers,
         force,
         noWaitAfter,
-        timeout: 0,
+        timeout: 1000,
       })),
     });
     return this;
@@ -185,11 +197,18 @@ export class Element {
     await this.wait.for({
       // TODO: log in toString options too in case they are not default
       toString: () => 'hover',
-      call: async () => this.handle.then(its => its.hover({
-        position, modifiers, force, timeout: 0,
+      call: async () => this.handle().then(its => its.hover({
+        position,
+        modifiers,
+        force,
+        timeout: 1000,
       })),
     });
     return this;
+  }
+
+  async text(): Promise<string> {
+    return this.handle().then(handle => handle.innerText());
   }
 
   toString() {
