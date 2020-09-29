@@ -11,10 +11,17 @@
 ## 0.0.next
 - TBD
 
-## 0.0.8 (to be released on 2020.08.??)
+## 0.0.9 (to be released on 2020.08.??)
 - renamed have.size to have.count
 - refactored from stage to Stage & Director
   - TBD: ...
+
+## 0.0.8 (to be released on 2020.08.??)
+- remove stages manager aka 'Director'
+- create single configuration entity in Stage
+- add conditions `have.exactText` & `have.element`
+- rename long `element(s)` method names to `$($)` for now
+- add `element.setValue` method which is `clear + fill`
 
 ## 0.0.7 (released on 2020.08.20)
 - fix element and elements toString
