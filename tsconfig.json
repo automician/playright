@@ -3,7 +3,7 @@
     "esModuleInterop": true,
     "allowJs": true,
     "checkJs": true,
-    "target": "ES2019",
+    "target": "ES5",
     "moduleResolution": "node",
     "declaration": true,
     "declarationMap": true,
