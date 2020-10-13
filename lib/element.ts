@@ -68,6 +68,17 @@ export class Element {
     });
   }
 
+  get parent(): Element {
+    return new Element(this.options, {
+      toString: () => `${this}.parent`,
+      call: async () => {
+        const element = await this.handle();
+        const parent = await element.$('xpath=./..');
+        return parent;
+      },
+    });
+  }
+
   /* --- Waiting --- */
   get wait(): Wait<Element> {
     return new Wait(this, this.options.timeout);
