@@ -27,13 +27,9 @@ import { Element } from './element';
  * currently we reuse here the impl. from Located
  */
 export namespace perform {
-  export const press = (
-      text: string,
-      { delay = 0, noWaitAfter = false } = {}
-  ) => (located: Element) => located.press(text, { delay, noWaitAfter });
+  export const press = (text: string, { delay = 0, noWaitAfter = false } = {}) => (located: Element) => located.press(text, { delay, noWaitAfter });
 
-  export const type = (text: string, { delay = 0, noWaitAfter = false } = {}) => (located: Element) =>
-    located.type(text, { delay, noWaitAfter });
+  export const type = (text: string, { delay = 0, noWaitAfter = false } = {}) => (located: Element) => located.type(text, { delay, noWaitAfter });
 
   export const click = (
     options = {}, // TODO: consider adding option values here too

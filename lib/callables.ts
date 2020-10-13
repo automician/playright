@@ -101,10 +101,7 @@ export class Condition<E> implements Callable<E, void> {
     return this.description;
   }
 
-  static failIfNot<E>(
-      description: string,
-      predicate: (entity: E) => Promise<boolean>,
-  ): Condition<E> {
+  static failIfNot<E>(description: string, predicate: (entity: E) => Promise<boolean>): Condition<E> {
     return new Condition(description, async (entity: E) => {
       if (!(await predicate(entity))) {
         throw new ConditionNotMatchedError();
