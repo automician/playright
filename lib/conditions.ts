@@ -51,6 +51,27 @@ export namespace match {
 
   export const cssClass = (name: string) => Condition.failIfNotActual(`has css class '${name}'`, query.attribute('class'), predicate.includesWord(name));
 
+  const attributeWithValue = (name: string, value: string) => new Condition(`has attribute: ${name}=${value}`, async (element: Element) => {
+    const attr = await query.attribute(name).call(element);
+    if (value !== attr) {
+      throw new Error(`actual ${name}="${attr}"`);
+    }
+  });
+
+  const attributeWithoutValue = (name: string) => new Condition(`has attribute: ${name}`, async (element: Element) => {
+    const attr = await query.attribute(name).call(element);
+    if (attr === null) {
+      throw new Error('actual: absent');
+    }
+  });
+
+  export const attribute = (name: string, value?: string) => {
+    if (value) {
+      return attributeWithValue(name, value);
+    }
+    return attributeWithoutValue(name);
+  };
+
   export const element = (locator: string) => Condition.failIfNot(`has element "${locator}"`, async (element: Element) => element
     .$(locator)
     .handle()
@@ -74,6 +95,8 @@ export namespace have {
 
   export const { count } = match;
 
+  export const { attribute } = match;
+
   export const { element } = match;
 
   export namespace no {
@@ -84,6 +107,8 @@ export namespace have {
     export const texts = (...values: string[] | number[]) => match.texts(...values).not;
 
     export const count = (num: number) => match.count(num).not;
+
+    export const attribute = (name: string, value?: string) => match.attribute(name, value).not;
   }
 }
 
