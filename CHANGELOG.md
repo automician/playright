@@ -9,14 +9,15 @@
 - change in Element: element(number_: number) to element(index: number)
 
 ## 0.0.next
+- refactored from stage to Stage & Director
 - TBD
 
-## 0.0.9 (to be released on 2020.08.??)
-- renamed have.size to have.count
-- refactored from stage to Stage & Director
-  - TBD: ...
+## 0.0.9 (to be released on 2020.10.13)
+- set target in tsconfig to "es5"
+- add `element.parent` getter
+- add `have.attribute` condition
 
-## 0.0.8 (to be released on 2020.08.??)
+## 0.0.8 (to be released on 2020.09.29)
 - remove stages manager aka 'Director'
 - create single configuration entity in Stage
 - add conditions `have.exactText` & `have.element`
