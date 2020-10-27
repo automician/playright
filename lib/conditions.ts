@@ -31,39 +31,54 @@ export namespace match {
   /* --- element conditions --- */
   // TODO: do we need a nested namespace? like match.element.isVisible ?
 
-  export const visible = Condition.failIfNot('is visible', async (element: Element) => {
-    const handle = await element.handle();
-    const box = await handle.boundingBox();
-    return box !== null;
-  });
+  export const visible =
+    Condition.failIfNot('is visible', async (element: Element) => {
+      const handle = await element.handle();
+      const box = await handle.boundingBox();
+      return box !== null;
+    });
 
-  export const text = (expected: string | number | RegExp) => Condition.failIfNotActual(
-    `has text: ${expected}`,
-    query.text,
-    typeof expected === 'string' ? predicate.includes(expected) : predicate.matches(expected),
-  );
+  export const text = (expected: string | number | RegExp) =>
+    Condition.failIfNotActual(
+      `has text: ${expected}`,
+      query.text,
+      typeof expected === 'string'
+        ? predicate.includes(expected)
+        : predicate.matches(expected),
+    );
 
-  export const exactText = (expected: string | number | RegExp) => Condition.failIfNotActual(
-    `has exact text: ${expected}`,
-    query.text,
-    typeof expected === 'string' ? predicate.equals(expected) : predicate.matches(expected),
-  );
+  export const exactText = (expected: string | number | RegExp) =>
+    Condition.failIfNotActual(
+      `has exact text: ${expected}`,
+      query.text,
+      typeof expected === 'string'
+        ? predicate.equals(expected)
+        : predicate.matches(expected),
+    );
 
-  export const cssClass = (name: string) => Condition.failIfNotActual(`has css class '${name}'`, query.attribute('class'), predicate.includesWord(name));
+  export const cssClass = (name: string) =>
+    Condition.failIfNotActual(
+      `has css class '${name}'`,
+      query.attribute('class'),
+      predicate.includesWord(name),
+    );
 
-  const attributeWithValue = (name: string, value: string) => new Condition(`has attribute: ${name}=${value}`, async (element: Element) => {
-    const attr = await query.attribute(name).call(element);
-    if (value !== attr) {
-      throw new Error(`actual ${name}="${attr}"`);
-    }
-  });
+  const attributeWithValue = (name: string, value: string) =>
+    new Condition(`has attribute: ${name}=${value}`,
+      async (element: Element) => {
+        const attr = await query.attribute(name).call(element);
+        if (value !== attr) {
+          throw new Error(`actual ${name}="${attr}"`);
+        }
+      });
 
-  const attributeWithoutValue = (name: string) => new Condition(`has attribute: ${name}`, async (element: Element) => {
-    const attr = await query.attribute(name).call(element);
-    if (attr === null) {
-      throw new Error('actual: absent');
-    }
-  });
+  const attributeWithoutValue = (name: string) =>
+    new Condition(`has attribute: ${name}`, async (element: Element) => {
+      const attr = await query.attribute(name).call(element);
+      if (attr === null) {
+        throw new Error('actual: absent');
+      }
+    });
 
   export const attribute = (name: string, value?: string) => {
     if (value) {
@@ -72,16 +87,26 @@ export namespace match {
     return attributeWithoutValue(name);
   };
 
-  export const element = (locator: string) => Condition.failIfNot(`has element "${locator}"`, async (element: Element) => element
-    .$(locator)
-    .handle()
-    .then(it => it !== null));
+  // TODO: do we really need it? $('.outher').by(have.element('.inner')) ?
+  export const element = (locator: string) =>
+    Condition.failIfNot(`has element "${locator}"`, async (element: Element) =>
+      element.$(locator).handle().then(it => it !== null));
 
   /* --- elements collection conditions --- */
 
-  export const texts = (...values: string[] | number[]) => Condition.failIfNotActual(`have texts ${values}`, query.texts, predicate.equalsByContainsToArray(values));
+  export const texts = (...values: string[] | number[]) =>
+    Condition.failIfNotActual(
+      `have texts ${values}`,
+      query.texts,
+      predicate.equalsByContainsToArray(values),
+    );
 
-  export const count = (num: number) => Condition.failIfNotActual(`have size ${num}`, query.count, predicate.equals(num));
+  export const count = (num: number) =>
+    Condition.failIfNotActual(
+      `have size ${num}`,
+      query.count,
+      predicate.equals(num),
+    );
 }
 
 export namespace have {
@@ -100,15 +125,18 @@ export namespace have {
   export const { element } = match;
 
   export namespace no {
-    export const text = (expected: string | number | RegExp) => match.text(expected).not;
+    export const text =
+      (expected: string | number | RegExp) => match.text(expected).not;
 
     export const cssClass = (name: string) => match.cssClass(name).not;
 
-    export const texts = (...values: string[] | number[]) => match.texts(...values).not;
+    export const texts =
+      (...values: string[] | number[]) => match.texts(...values).not;
 
     export const count = (num: number) => match.count(num).not;
 
-    export const attribute = (name: string, value?: string) => match.attribute(name, value).not;
+    export const attribute =
+      (name: string, value?: string) => match.attribute(name, value).not;
   }
 }
 

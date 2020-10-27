@@ -1,7 +1,7 @@
 import { chromium, BrowserContext } from 'playwright';
 import { Stage, perform, have } from '../../lib';
 
-describe('Todomvc Storage', () => {
+xdescribe('Todomvc Storage', () => {
   let stage: Stage;
   beforeAll(async () => {
     jest.setTimeout(60 * 1000);

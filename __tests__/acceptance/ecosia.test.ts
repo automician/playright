@@ -1,7 +1,7 @@
 import { chromium, BrowserContext } from 'playwright';
 import { Stage, perform } from '../../lib';
 
-describe('Ecosia', () => {
+xdescribe('Ecosia', () => {
   let stage: Stage;
   beforeAll(async () => {
     jest.setTimeout(60 * 1000);

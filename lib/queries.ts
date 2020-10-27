@@ -19,6 +19,7 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
+/* eslint-disable import/no-cycle */
 
 import { Element } from './element';
 import { Elements } from './elements';
@@ -71,6 +72,7 @@ export namespace query {
 
   export const texts: Callable<Elements, string[]> = {
     toString: () => 'texts',
-    call: async elements => Promise.all((await elements.handles()).map(its => its.innerText())),
+    call: async elements =>
+      Promise.all((await elements.handles()).map(its => its.innerText())),
   };
 }

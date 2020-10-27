@@ -20,13 +20,9 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-import * as playwright from 'playwright';
-
-export interface Configuration { // TODO: consider renaming to Options or keep as Configuration but then rename all params to config
-  browser: playwright.Browser;
-  context: playwright.BrowserContext;
-  page: playwright.Page;
-  // TODO: consider separating the upper three guys from the following...
-  timeout: number;
-  baseUrl?: string;
+export class TimeoutError extends Error {
+  toString() {
+    const exceptionMsg = `Message: ${this.message}\n`;
+    return exceptionMsg;
+  }
 }

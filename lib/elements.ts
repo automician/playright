@@ -20,6 +20,8 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
+/* eslint-disable import/no-cycle */
+
 import * as playwright from 'playwright';
 import { Configuration } from './configuraton';
 import { Wait } from './wait';
@@ -39,8 +41,7 @@ export class Elements {
   /* --- Located --- */
 
   async handles(): Promise<playwright.ElementHandle<Node>[]> {
-    const result = await this.find.call();
-    return result;
+    return this.find.call();
   }
 
   get wait(): Wait<Elements> {
@@ -50,13 +51,14 @@ export class Elements {
   /* --- Locating --- */
 
   async cached(): Promise<Elements> {
+    const cache = await this.handles();
     return new Elements(this.options, {
       toString: () => this.toString(),
-      call: () => this.handles(),
+      call: async () => cache,
     });
   }
 
-  async cachedArray(): Promise<Element[]> {
+  async cachedArray(): Promise<Element[]> { // TODO: are we sure about this name?
     const handles = await this.handles();
     return handles.map(
       (handle, index) => new Element(this.options, {
@@ -77,7 +79,8 @@ export class Elements {
         const actual = await this.handles();
         if (actual.length <= index) {
           throw new Error(
-            `Cannot get element with index ${index} from elements collection with length ${actual.length}`,
+            `Cannot get element with index ${index}`
+            + `from elements collectionwith length ${actual.length}`,
           );
         }
         return actual[index];
@@ -105,7 +108,10 @@ export class Elements {
         for (const element of cached) {
           outerHTMLs.push(await query.outerHtml.call(element));
         }
-        throw new Error(`Cannot find element by condition «${condition}» from elements collection:\n[${outerHTMLs}]`);
+        throw new Error(
+          `Cannot find element by condition «${condition}» `
+          + `from elements collection:\n[${outerHTMLs}]`,
+        );
       },
     });
   }

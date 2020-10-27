@@ -20,7 +20,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-import { ConditionNotMatchedError } from './errors';
+import { ConditionNotMatchedError } from './errors/ConditionNotMatchedError';
 
 /**
  * One-argument-async-function
@@ -61,7 +61,10 @@ export type Command<T> = Query<T, void>;
  * or in other words (matched | failed)
  */
 export class Condition<E> implements Callable<E, void> {
-  constructor(private readonly description: string, private readonly fn: Lambda<E, void>) {
+  constructor(
+    private readonly description: string,
+    private readonly fn: Lambda<E, void>,
+  ) {
     this.description = description;
     this.fn = fn;
   }
@@ -101,7 +104,10 @@ export class Condition<E> implements Callable<E, void> {
     return this.description;
   }
 
-  static failIfNot<E>(description: string, predicate: (entity: E) => Promise<boolean>): Condition<E> {
+  static failIfNot<E>(
+    description: string,
+    predicate: (entity: E) => Promise<boolean>,
+  ): Condition<E> {
     return new Condition(description, async (entity: E) => {
       if (!(await predicate(entity))) {
         throw new ConditionNotMatchedError();
@@ -127,45 +133,55 @@ export class Condition<E> implements Callable<E, void> {
    */
   static not<T>(condition: Condition<T>, description?: string): Condition<T> {
     const [isOrHave, ...name] = condition.toString().split(' ');
-    const newDescription = `${isOrHave} ${isOrHave === 'is' ? 'not' : 'no'} ${name.join(' ')}`;
+    const notOrNo = isOrHave === 'is' ? 'not' : 'no';
+    const newDescription = `${isOrHave} ${notOrNo} ${name.join(' ')}`;
     // TODO: can we simplify this logic?
-    return new Condition(description || newDescription, (entity: T) => condition.call(entity).then(
-      () => {
-        throw new ConditionNotMatchedError();
-      },
-      () => {},
-    ));
+    return new Condition(
+      description || newDescription,
+      (entity: T) => condition.call(entity).then(
+        () => {
+          throw new ConditionNotMatchedError();
+        },
+        () => { },
+      ),
+    );
   }
 
   /**
    * Combines conditions by logical AND
    */
   static and<T>(...conditions: Condition<T>[]): Condition<T> {
-    return new Condition(conditions.map(toString).join(' and '), async (entity: T) => {
-      // eslint-disable-next-line no-restricted-syntax
-      for (const condition of conditions) {
-        await condition.call(entity);
-      }
-    });
+    return new Condition(
+      conditions.map(toString).join(' and '),
+      async (entity: T) => {
+        // eslint-disable-next-line no-restricted-syntax
+        for (const condition of conditions) {
+          await condition.call(entity);
+        }
+      },
+    );
   }
 
   /**
    * Combines conditions by logical OR
    */
   static or<T>(...conditions: Condition<T>[]): Condition<T> {
-    return new Condition(conditions.map(toString).join(' or '), async (entity: T) => {
-      const errors: Error[] = [];
-      // eslint-disable-next-line no-restricted-syntax
-      for (const condition of conditions) {
-        try {
-          await condition.call(entity);
-          return;
-        } catch (error) {
-          errors.push(error);
+    return new Condition(
+      conditions.map(toString).join(' or '),
+      async (entity: T) => {
+        const errors: Error[] = [];
+        // eslint-disable-next-line no-restricted-syntax
+        for (const condition of conditions) {
+          try {
+            await condition.call(entity);
+            return;
+          } catch (error) {
+            errors.push(error);
+          }
         }
-      }
-      throw new Error(errors.map(toString).join('; '));
-    });
+        throw new Error(errors.map(toString).join('; '));
+      },
+    );
   }
 
   /**

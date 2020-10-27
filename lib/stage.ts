@@ -25,7 +25,7 @@ import { Elements } from './elements';
 import { Configuration } from './configuraton';
 import { Wait } from './wait';
 
-export class Stage {
+export class Stage { // TODO: what about rename it to Context? o_O
   readonly options: Configuration;
 
   readonly wait: Wait<Stage>;
@@ -36,7 +36,10 @@ export class Stage {
   }
 
   async goto(absoluteOrRelativeUrl: string) {
-    const url = this.options.baseUrl ? `${this.options.baseUrl}${absoluteOrRelativeUrl}` : absoluteOrRelativeUrl;
+    const url = this.options.baseUrl
+      ? `${this.options.baseUrl}${absoluteOrRelativeUrl}`
+      : absoluteOrRelativeUrl;
+
     await this.wait.for({
       toString: () => `goto ${url}`,
       call: async () => this.options.page.goto(url),

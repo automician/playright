@@ -7,29 +7,33 @@
     - even if few calls with then
   - should wrap lines more than 79
 - change in Element: element(number_: number) to element(index: number)
+- can we eliminate cycle dependency in Element and Elements?
 
 ## 0.0.next
-- refactored from stage to Stage & Director
-- TBD
+- refine params order in Element, Elements
+- refactor from Stage to BrowserContext as wrapper over playWright context
 
-## 0.0.9 (to be released on 2020.10.13)
+## 0.0.10 (to be released on 2020.11)
+- fixed indexes for elements.$(index) so it now starts from 0
+
+## 0.0.9 (released on 2020.10.13)
 - set target in tsconfig to "es5"
-- add `element.parent` getter
-- add `have.attribute` condition
+- added `element.parent` getter
+- added `have.attribute` condition
 
-## 0.0.8 (to be released on 2020.09.29)
-- remove stages manager aka 'Director'
-- create single configuration entity in Stage
-- add conditions `have.exactText` & `have.element`
-- rename long `element(s)` method names to `$($)` for now
-- add `element.setValue` method which is `clear + fill`
+## 0.0.8 (released on 2020.09.29)
+- removed stages manager aka 'Director'
+- created single configuration entity in Stage
+- added conditions `have.exactText` & `have.element`
+- renamed long `element(s)` method names to `$($)` for now
+- added `element.setValue` method which is `clear + fill`
 
 ## 0.0.7 (released on 2020.08.20)
-- fix element and elements toString
-- fix missing async/awaits
-- make `goto` waitable
+- fixed element and elements toString
+- fixed missing async/awaits
+- made `goto` waitable
 
-## 0.0.6 (sipped)
+## 0.0.6 (skipped)
 - added elements to lib index.ts
 - tuned project setup
   - switch from jasmine to jest

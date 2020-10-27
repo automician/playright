@@ -20,7 +20,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-import { TimeoutError } from './errors';
+import { TimeoutError } from './errors/TimeoutError';
 import { Callable } from './callables';
 
 export class Wait<T> {
@@ -64,6 +64,7 @@ export class Wait<T> {
       .slice(3)
       .join('\n');
 
+    // eslint-disable-next-line no-constant-condition
     while (true) {
       try {
         /* eslint-disable no-await-in-loop */
@@ -94,4 +95,6 @@ export class Wait<T> {
       () => false,
     );
   }
+
+  // TODO: consider adding while<R>(callable: Callable<T, R>)
 }

@@ -24,13 +24,16 @@ import * as driver from 'playwright';
 import { Condition, Locator } from './callables';
 import { Configuration } from './configuraton';
 import { Wait } from './wait';
+// eslint-disable-next-line import/no-cycle
 import { Elements } from './elements';
 
-/**
- * TODO: consider putting into Playright namespace
- */
+// TODO: consider putting into Playright namespace
 export class Element {
-  constructor(readonly options: Configuration, private readonly find: Locator<driver.ElementHandle<Node>>) {
+  constructor(
+    readonly options: Configuration, // TODO: make it second param like in SelenideJs and Playwright...
+    // TODO: but should we rename options to config, since options are something optional, while this param is required...?
+    private readonly find: Locator<driver.ElementHandle<Node>>,
+  ) {
     this.options = options;
     this.find = find;
   }
@@ -44,6 +47,13 @@ export class Element {
     }
     return handle;
   }
+
+  /* TODO: check if works and refactor to:
+  async handle(): Promise<driver.ElementHandle<Node>> {
+    return await this.find.call()
+      ?? Promise.reject(new Error('element was not found'));
+  }
+   */
 
   /* --- Locating --- */
   $(selector: string): Element {
@@ -68,6 +78,8 @@ export class Element {
     });
   }
 
+  // TODO: consider removing, in order to identify explicitly kind of bulky xpath usage $('.child').$('./..')
+  // TODO: at least we can disable it for release 1.0 and decide later
   get parent(): Element {
     return new Element(this.options, {
       toString: () => `${this}.parent`,
@@ -110,7 +122,8 @@ export class Element {
   ): Promise<Element> {
     await this.wait.for({
       toString: () => `type ${text}`,
-      call: async () => this.handle().then(its => its.type(text, { ...options, timeout: 5000 })),
+      call: async () => this.handle().then(its =>
+        its.type(text, { ...options, timeout: 5000 })),
     });
     return this;
   }
@@ -150,10 +163,15 @@ export class Element {
    * @param options should be like ElementHandlePressOptions from playwright
    * but without timeout becuase we have our own waiting logic and timeout
    */
-  async press(key: string, { delay = 0, noWaitAfter = false } = {}): Promise<Element> {
+  async press(key: string, {
+    delay = 0,
+    noWaitAfter = false,
+  } = {}): Promise<Element> {
     await this.wait.for({
       toString: () => `press ${key}`,
-      call: async () => this.handle().then(its => its.press(key, { delay, noWaitAfter, timeout: 1000 })),
+      call: async () =>
+        this.handle().then(its => its.press(key,
+          { delay, noWaitAfter, timeout: 1000 })),
     });
     return this;
   }
@@ -169,12 +187,16 @@ export class Element {
   } = {}): Promise<Element> {
     const buttonName = button;
     await this.wait.for({
-      // TODO: log in toString options too in case they are not default
+      // WISH: log in toString options too in case they are not default
       toString: () => 'click',
       call: async () => this.handle().then(its => its.click({
-        // TODO: o_O not sure wtf so I need the workaround below...
+        // not sure wtf so I need the workaround below...
         // eslint-disable-next-line no-nested-ternary
-        button: buttonName === 'left' ? 'left' : buttonName === 'right' ? 'right' : 'middle',
+        button: buttonName === 'left'
+          ? 'left'
+          : buttonName === 'right'
+            ? 'right'
+            : 'middle',
         clickCount,
         delay,
         position,
@@ -187,11 +209,34 @@ export class Element {
     return this;
   }
 
-  /**
-   * TODO: shouldn't we call (await this.handle).dblClick() ?
-   */
-  async doubleClick(): Promise<Element> {
-    await this.click({ clickCount: 2 });
+  async doubleClick({
+    button = 'left', // |"right"|"middle";
+    delay = 0,
+    position = undefined,
+    modifiers = undefined, // Array<"Alt"|"Control"|"Meta"|"Shift">,
+    force = false,
+    noWaitAfter = false,
+  } = {}): Promise<Element> {
+    const buttonName = button;
+    await this.wait.for({
+      // WISH: log in toString options too in case they are not default
+      toString: () => 'click',
+      call: async () => this.handle().then(its => its.dblclick({
+        // not sure wtf so I need the workaround below...
+        // eslint-disable-next-line no-nested-ternary
+        button: buttonName === 'left'
+          ? 'left'
+          : buttonName === 'right'
+            ? 'right'
+            : 'middle',
+        delay,
+        position,
+        modifiers,
+        force,
+        noWaitAfter,
+        timeout: 1000,
+      })),
+    });
     return this;
   }
 
@@ -206,7 +251,7 @@ export class Element {
     force = false,
   } = {}): Promise<Element> {
     await this.wait.for({
-      // TODO: log in toString options too in case they are not default
+      // WISH: log in toString options too in case they are not default
       toString: () => 'hover',
       call: async () => this.handle().then(its => its.hover({
         position,
@@ -218,9 +263,12 @@ export class Element {
     return this;
   }
 
+  // TODO: consider removing
   async text(): Promise<string> {
-    return this.handle().then(handle => handle.innerText());
+    return this.handle().then(its => its.innerText());
   }
+
+  // TODO: add get(query) syntax, like get(its.innerText)
 
   toString() {
     return this.find.toString();
