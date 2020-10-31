@@ -20,6 +20,10 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
+// TODO: consider breaking down into different Options classes, like ElementOptions, ElementsOptions, etc.
+// then it will be
+// * consistent with Playwright
+// * more granular, structural and so easier to understand, to not be lost in a big heap of different options
 export interface Configuration { // TODO: consider renaming to Options or keep as Configuration but then rename all params to config
   timeout: number;
   baseUrl?: string;

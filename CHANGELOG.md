@@ -19,6 +19,8 @@
   - rearranged parameters of Element, Elements
     - now options/config is a second param, the locator is first
   - removed browser, context and page from Configuration
+  - added page as first main param to Stage
+  - renamed Stage to UserPage
 
 ## 0.0.9 (released on 2020.10.13)
 - set target in tsconfig to "es5"

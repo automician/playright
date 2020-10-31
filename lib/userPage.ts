@@ -26,12 +26,27 @@ import { Elements } from './elements';
 import { Configuration } from './configuraton';
 import { Wait } from './wait';
 
-export class Stage { // TODO: what about rename it to Context? o_O
+/**
+ * The original playwright.Page is more like a "page driver".
+ * The idea of this class is to reflect the Page from the real user perspective.
+ * Real user implicitely waits for all happening on the page (see UserPage#wait)
+ * Real user thinks about elements on page not as snapshots in some exact time,
+ * but as dynamic "lazy" objects that can be re-found on the page at any time when user
+ * wants to interact with them.
+ *
+ * TODO: can find a better name instead UserPage? like PageModel, PageObject, etc
+ *       with PageObject we should count that classic PageObjects are in general
+ *       ObjectsOnPage
+ * TODO: refine the "open url" method name correspondingly
+ *       for example UserPage#goto or UserPage#visit sounds ok,
+ *       but PageObject#goto is awkward, PageObject#load or #open sounds better
+ */
+export class UserPage {
   readonly page: playwright.Page;
 
   readonly options: Configuration;
 
-  readonly wait: Wait<Stage>;
+  readonly wait: Wait<UserPage>;
 
   constructor(
     page: playwright.Page,

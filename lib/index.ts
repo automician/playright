@@ -25,4 +25,4 @@ export { have, be } from './conditions';
 
 export { Element } from './element';
 export { Elements } from './elements';
-export { Stage } from './stage';
+export { UserPage as Stage } from './userPage';
