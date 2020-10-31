@@ -20,17 +20,24 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
+import * as playwright from 'playwright';
 import { Element } from './element';
 import { Elements } from './elements';
 import { Configuration } from './configuraton';
 import { Wait } from './wait';
 
 export class Stage { // TODO: what about rename it to Context? o_O
+  readonly page: playwright.Page;
+
   readonly options: Configuration;
 
   readonly wait: Wait<Stage>;
 
-  constructor(options: Configuration) {
+  constructor(
+    page: playwright.Page,
+    options: Configuration,
+  ) {
+    this.page = page;
     this.options = options;
     this.wait = new Wait(this, this.options.timeout);
   }
@@ -42,7 +49,7 @@ export class Stage { // TODO: what about rename it to Context? o_O
 
     await this.wait.for({
       toString: () => `goto ${url}`,
-      call: async () => this.options.page.goto(url),
+      call: async () => this.page.goto(url),
     });
   }
 
@@ -50,7 +57,7 @@ export class Stage { // TODO: what about rename it to Context? o_O
     return new Element(
       {
         toString: () => `$(${selector})`,
-        call: () => this.options.page.$(selector),
+        call: () => this.page.$(selector),
       },
       this.options,
     );
@@ -60,7 +67,7 @@ export class Stage { // TODO: what about rename it to Context? o_O
     return new Elements(
       {
         toString: () => `$$(${selector})`,
-        call: () => this.options.page.$$(selector),
+        call: () => this.page.$$(selector),
       },
       this.options,
     );

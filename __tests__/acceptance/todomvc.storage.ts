@@ -1,24 +1,27 @@
-import { chromium, BrowserContext } from 'playwright';
+import { chromium, BrowserContext, Browser, Page } from 'playwright';
 import { Stage, perform, have } from '../../lib';
 
 xdescribe('Todomvc Storage', () => {
+  let browser: Browser;
+  let page: Page;
+  let context: BrowserContext;
   let stage: Stage;
   beforeAll(async () => {
     jest.setTimeout(60 * 1000);
     const browser = await chromium.launch({ headless: false, slowMo: 50 });
     const context = await browser.newContext();
     const page = await context.newPage();
-    stage = new Stage({
-      browser,
-      context,
+    stage = new Stage(
       page,
-      timeout: 5000,
-    });
+      {
+        timeout: 5000,
+      },
+    );
     /* the following is true by default */
     // director.assign({ launchOptions: { headless: false } });
   });
   afterAll(async () => {
-    await stage.options.browser.close();
+    await browser.close();
   });
 
   it('should not share todos among different users (simulating by different browser contexts)', async () => {
