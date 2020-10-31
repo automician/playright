@@ -15,6 +15,8 @@
 
 ## 0.0.10 (to be released on 2020.11)
 - fixed indexes for elements.$(index) so it now starts from 0
+- rearranged parameters of Element, Elements
+  - now options/config is a second param, the locator is first
 
 ## 0.0.9 (released on 2020.10.13)
 - set target in tsconfig to "es5"

@@ -47,16 +47,22 @@ export class Stage { // TODO: what about rename it to Context? o_O
   }
 
   $(selector: string) {
-    return new Element(this.options, {
-      toString: () => `$(${selector})`,
-      call: () => this.options.page.$(selector),
-    });
+    return new Element(
+      {
+        toString: () => `$(${selector})`,
+        call: () => this.options.page.$(selector),
+      },
+      this.options,
+    );
   }
 
   $$(selector: string) {
-    return new Elements(this.options, {
-      toString: () => `$$(${selector})`,
-      call: () => this.options.page.$$(selector),
-    });
+    return new Elements(
+      {
+        toString: () => `$$(${selector})`,
+        call: () => this.options.page.$$(selector),
+      },
+      this.options,
+    );
   }
 }

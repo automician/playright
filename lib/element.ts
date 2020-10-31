@@ -30,9 +30,9 @@ import { Elements } from './elements';
 // TODO: consider putting into Playright namespace
 export class Element {
   constructor(
-    readonly options: Configuration, // TODO: make it second param like in SelenideJs and Playwright...
-    // TODO: but should we rename options to config, since options are something optional, while this param is required...?
     private readonly find: Locator<driver.ElementHandle<Node>>,
+    // TODO: but should we rename options to config, since options are something optional, while this param is required...?
+    readonly options: Configuration,
   ) {
     this.options = options;
     this.find = find;
@@ -57,38 +57,47 @@ export class Element {
 
   /* --- Locating --- */
   $(selector: string): Element {
-    return new Element(this.options, {
-      toString: () => `${this}.$(${selector})`,
-      call: async () => {
-        const element = await this.handle();
-        const result = await element.$(selector);
-        return result;
+    return new Element(
+      {
+        toString: () => `${this}.$(${selector})`,
+        call: async () => {
+          const element = await this.handle();
+          const result = await element.$(selector);
+          return result;
+        },
       },
-    });
+      this.options,
+    );
   }
 
   $$(selector: string): Elements {
-    return new Elements(this.options, {
-      toString: () => `${this}.$$(${selector})`,
-      call: async () => {
-        const element = await this.handle();
-        const result = await element.$$(selector);
-        return result;
+    return new Elements(
+      {
+        toString: () => `${this}.$$(${selector})`,
+        call: async () => {
+          const element = await this.handle();
+          const result = await element.$$(selector);
+          return result;
+        },
       },
-    });
+      this.options,
+    );
   }
 
   // TODO: consider removing, in order to identify explicitly kind of bulky xpath usage $('.child').$('./..')
   // TODO: at least we can disable it for release 1.0 and decide later
   get parent(): Element {
-    return new Element(this.options, {
-      toString: () => `${this}.parent`,
-      call: async () => {
-        const element = await this.handle();
-        const parent = await element.$('xpath=./..');
-        return parent;
+    return new Element(
+      {
+        toString: () => `${this}.parent`,
+        call: async () => {
+          const element = await this.handle();
+          const parent = await element.$('xpath=./..');
+          return parent;
+        },
       },
-    });
+      this.options,
+    );
   }
 
   /* --- Waiting --- */
