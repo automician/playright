@@ -11,7 +11,10 @@
 ## 0.0.next
 - TBD
 
-## 0.0.10-beta (released on 2020.10.13)
+## 0.0.11 (released on 2020.11.22)
+- set typescript target to `es2017`, module to `commonjs`, moduleResolution to `node`
+
+## 0.0.10 (released on 2020.11.22)
 - fix for `query.texts` command
 - update `have.attribute` to accept RegExp
 - update `typescript` to 4.1.2
