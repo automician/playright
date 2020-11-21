@@ -59,10 +59,6 @@ export class Wait<T> {
   async for<R>(callable: Callable<T, R>): Promise<R> {
     const finishTime = new Date().getTime() + this.timeout;
     // make assertions stack point to failed client code, omit playright path
-    const syncStack = new Error().stack
-      .split('\n')
-      .slice(3)
-      .join('\n');
 
     while (true) {
       try {
@@ -78,7 +74,6 @@ export class Wait<T> {
               + '\n'
               + `Reason: ${reason.message}\n`,
           );
-          error.stack = syncStack;
 
           const handledError = await this.handleFailure(error);
           throw handledError;

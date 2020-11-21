@@ -51,8 +51,11 @@ export namespace match {
 
   export const cssClass = (name: string) => Condition.failIfNotActual(`has css class '${name}'`, query.attribute('class'), predicate.includesWord(name));
 
-  const attributeWithValue = (name: string, value: string) => new Condition(`has attribute: ${name}=${value}`, async (element: Element) => {
+  const attributeWithValue = (name: string, value: string | RegExp) => new Condition(`has attribute: ${name}=${value}`, async (element: Element) => {
     const attr = await query.attribute(name).call(element);
+    if (value instanceof RegExp && value.test(attr)) {
+      throw new Error(`actual ${name}="${attr}"`);
+    }
     if (value !== attr) {
       throw new Error(`actual ${name}="${attr}"`);
     }
@@ -65,7 +68,7 @@ export namespace match {
     }
   });
 
-  export const attribute = (name: string, value?: string) => {
+  export const attribute = (name: string, value?: string | RegExp) => {
     if (value) {
       return attributeWithValue(name, value);
     }

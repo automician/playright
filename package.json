@@ -2,12 +2,12 @@
   "name": "playright",
   "description": "test- and user-oriented wrapper for Playwright",
   "homepage": "https://github.com/automician/playright",
-  "version": "0.0.9",
+  "version": "0.0.10-beta",
   "main": "dist/index.js",
   "typings": "dist/index.d.ts",
   "dependencies": {
-    "typescript": "3.9.7",
-    "playwright": "1.3.0"
+    "playwright": "^1.6.2",
+    "typescript": "^4.1.2"
   },
   "devDependencies": {
     "@types/jest": "^26.0.9",

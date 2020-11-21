@@ -9,10 +9,16 @@
 - change in Element: element(number_: number) to element(index: number)
 
 ## 0.0.next
-- refactored from stage to Stage & Director
 - TBD
 
-## 0.0.9 (to be released on 2020.10.13)
+## 0.0.10-beta (released on 2020.10.13)
+- fix for `query.texts` command
+- update `have.attribute` to accept RegExp
+- update `typescript` to 4.1.2
+- update `playwright` to 1.6.1
+- remove attempt to use sync stack because it causes issues with console reporter on jest-circus
+
+## 0.0.9 (released on 2020.10.13)
 - set target in tsconfig to "es5"
 - add `element.parent` getter
 - add `have.attribute` condition

@@ -71,6 +71,14 @@ export namespace query {
 
   export const texts: Callable<Elements, string[]> = {
     toString: () => 'texts',
-    call: async elements => Promise.all((await elements.handles()).map(its => its.innerText())),
+    call: async elements => {
+      const innerTexts: string[] = [];
+      const handles = await elements.handles();
+      // eslint-disable-next-line no-restricted-syntax
+      for (const handle of handles) {
+        innerTexts.push(await handle.innerText());
+      }
+      return innerTexts;
+    },
   };
 }
