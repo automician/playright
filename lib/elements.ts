@@ -89,6 +89,12 @@ export class Elements {
     return this.$(0);
   }
 
+  sliced(start: number, end?: number): Elements {
+    return new Elements(this.options, {
+      toString: () => `${this}.sliced(${start}${end ? `, ${end}` : ''})`,
+      call: async () => this.handles().then(arr => arr.slice(start, end)),
+    });
+  }
   firstBy(condition: Condition<Element>): Element {
     return new Element(this.options, {
       toString: () => `${this}.firstBy(${condition})`,

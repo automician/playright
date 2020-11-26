@@ -11,6 +11,9 @@
 ## 0.0.next
 - TBD
 
+## 0.0.12 (released on 2020.11.26)
+- add `elements.sliced(...)` method
+
 ## 0.0.11 (released on 2020.11.22)
 - set typescript target to `es2017`, module to `commonjs`, moduleResolution to `node`
 
