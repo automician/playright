@@ -127,6 +127,13 @@ export class Elements {
     });
   }
 
+  sliced(start: number, end?: number): Elements {
+    return new Elements(this.options, {
+      toString: () => `${this}.sliced(${start}${end ? `, ${end}` : ''})`,
+      call: async () => this.handles().then(arr => arr.slice(start, end)),
+    });
+  }
+
   /* --- Assertable --- */
 
   async should(condition: Condition<Elements>): Promise<Elements> {
