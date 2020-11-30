@@ -11,6 +11,10 @@
 ## 0.0.next
 - TBD
 
+## 0.0.13 (released on 2020.11.30)
+- add `elements.$$(...)` method to map collection to another collection
+- add `elements.eachShould(...)` method to apply `Element` condition to each element in `Elements`
+
 ## 0.0.12 (released on 2020.11.26)
 - add `elements.sliced(...)` method
 

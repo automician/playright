@@ -89,12 +89,32 @@ export class Elements {
     return this.$(0);
   }
 
+  $$(mapper: (element: Element) => Element | Elements): Elements {
+    return new Elements(this.options, {
+      toString: () => `${this}.$$(${mapper})`,
+      call: async () => {
+        const mappedElements = await this.cachedArray().then(arr => arr.map(mapper));
+        const results = [];
+        // eslint-disable-next-line no-restricted-syntax
+        for (const it of mappedElements) {
+          if (it instanceof Elements) {
+            results.push(...await it.handles());
+          } else {
+            results.push(await it.handle());
+          }
+        }
+        return results;
+      },
+    });
+  }
+
   sliced(start: number, end?: number): Elements {
     return new Elements(this.options, {
       toString: () => `${this}.sliced(${start}${end ? `, ${end}` : ''})`,
       call: async () => this.handles().then(arr => arr.slice(start, end)),
     });
   }
+
   firstBy(condition: Condition<Element>): Element {
     return new Element(this.options, {
       toString: () => `${this}.firstBy(${condition})`,
@@ -133,17 +153,21 @@ export class Elements {
     });
   }
 
-  sliced(start: number, end?: number): Elements {
-    return new Elements(this.options, {
-      toString: () => `${this}.sliced(${start}${end ? `, ${end}` : ''})`,
-      call: async () => this.handles().then(arr => arr.slice(start, end)),
-    });
-  }
-
   /* --- Assertable --- */
 
   async should(condition: Condition<Elements>): Promise<Elements> {
     await this.wait.for(condition);
+    return this;
+  }
+
+  async eachShould(condition: Condition<Element>): Promise<Elements> {
+    await this.wait.for(new Condition(`each ${condition}`, async (elements: Elements) => {
+      const cachedArray = await elements.cachedArray();
+      // eslint-disable-next-line no-restricted-syntax
+      for (const element of cachedArray) {
+        await condition.call(element);
+      }
+    }));
     return this;
   }
 
