@@ -2,11 +2,11 @@
   "name": "playright",
   "description": "test- and user-oriented wrapper for Playwright",
   "homepage": "https://github.com/automician/playright",
-  "version": "0.0.13",
+  "version": "0.0.14",
   "main": "dist/index.js",
   "typings": "dist/index.d.ts",
   "dependencies": {
-    "playwright": "^1.6.2",
+    "playwright": "^1.7.1",
     "typescript": "^4.1.2"
   },
   "devDependencies": {
