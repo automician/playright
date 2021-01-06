@@ -1,17 +1,17 @@
 import { chromium, Browser, BrowserContext, Page } from 'playwright';
-import { Stage, perform } from '../../lib';
+import { UserPage, perform } from '../../lib';
 
 xdescribe('Ecosia', () => {
   let browser: Browser;
   let page: Page;
   let context: BrowserContext;
-  let stage: Stage;
+  let ui: UserPage;
   beforeAll(async () => {
     jest.setTimeout(60 * 1000);
     browser = await chromium.launch({ headless: false, slowMo: 50 });
     context = await browser.newContext();
     page = await context.newPage();
-    stage = new Stage(
+    ui = new UserPage(
       page,
       {
         timeout: 5000,
@@ -25,10 +25,10 @@ xdescribe('Ecosia', () => {
   });
 
   it('should search', async () => {
-    await stage.goto('https://www.ecosia.org/');
+    await ui.goto('https://www.ecosia.org/');
 
     // await (await tryToGetPage().waitForSelector('[name=q]')).type('github yashaka selene');
-    const query = stage.$('[name=q]');
+    const query = ui.$('[name=q]');
     // await query.type('github yashaka selene');
 
     // await (await tryToGetPage().$('[name=q]')).press('Enter');
@@ -41,7 +41,7 @@ xdescribe('Ecosia', () => {
     // await element('[name=q]').type('github yashaka selene')
     //     .then(perform.press('Enter'));
 
-    const results = stage.$('.result');
+    const results = ui.$('.result');
 
     // await (await stage.page.waitForSelector(
     // '.result >> xpath=.//*[contains(@class, "result-title") and contains(text(), "yashaka/selene")]')).click()

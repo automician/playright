@@ -31,10 +31,12 @@ import { Wait } from './wait';
  * The idea of this class is to reflect the Page from the real user perspective.
  * Real user implicitely waits for all happening on the page (see UserPage#wait)
  * Real user thinks about elements on page not as snapshots in some exact time,
- * but as dynamic "lazy" objects that can be re-found on the page at any time when user
- * wants to interact with them.
+ * but as dynamic "lazy" objects that can be re-found on the page 
+ * at any time when user wants to interact with them.
  *
- * TODO: can find a better name instead UserPage? like PageModel, PageObject, etc
+ * TODO: can find a better name instead current one? 
+ *       Maybe View? UIView? RightPage?
+ *       Maybe PageModel, PageObject, etc
  *       with PageObject we should count that classic PageObjects are in general
  *       ObjectsOnPage
  * TODO: refine the "open url" method name correspondingly

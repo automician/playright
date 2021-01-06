@@ -1,18 +1,17 @@
 import { chromium, BrowserContext, Browser, Page } from 'playwright';
-import { Stage, perform, have } from '../../lib';
+import { perform, have, UserPage } from '../../lib';
 
 describe('Todomvc', () => {
   let browser: Browser;
-  let page: Page;
-  let context: BrowserContext;
-  let stage: Stage;
+  let ui: UserPage;
 
   beforeAll(async () => {
+    console.log('... before all!')
     jest.setTimeout(60 * 1000);
-    const browser = await chromium.launch({ headless: false/*, slowMo: 50*/ });
+    browser = await chromium.launch({ headless: false/*, slowMo: 50*/ });
     const context = await browser.newContext();
     const page = await context.newPage();
-    stage = new Stage(
+    ui = new UserPage(
       page,
       {
         timeout: 5000,
@@ -25,28 +24,28 @@ describe('Todomvc', () => {
   });
 
   it('should complete todo', async () => {
-    await stage.goto('http://todomvc.com/examples/emberjs');
+    await ui.goto('http://todomvc.com/examples/emberjs');
 
-    await stage.$('#new-todo').type('a').then(perform.press('Enter'));
-    await stage.$('#new-todo').type('b').then(perform.press('Enter'));
-    await stage.$('#new-todo').type('c').then(perform.press('Enter'));
-    await stage.$('#new-todo').type('d').then(perform.press('Enter'));
-    await stage.$$('#todo-list li').should(have.texts('a', 'b', 'c', 'd'));
+    await ui.$('#new-todo').type('a').then(perform.press('Enter'));
+    await ui.$('#new-todo').type('b').then(perform.press('Enter'));
+    await ui.$('#new-todo').type('c').then(perform.press('Enter'));
+    await ui.$('#new-todo').type('d').then(perform.press('Enter'));
+    await ui.$$('#todo-list li').should(have.texts('a', 'b', 'c', 'd'));
 
-    await stage.$$('#todo-list li').first.$('.toggle').click();
-    await stage.$$('#todo-list li').by(have.cssClass('completed'))
+    await ui.$$('#todo-list li').first.$('.toggle').click();
+    await ui.$$('#todo-list li').by(have.cssClass('completed'))
       .should(have.texts('a'));
 
-    await stage.$$('#todo-list li').$(1).$('.toggle').click();
-    await stage.$$('#todo-list li').by(have.cssClass('completed'))
+    await ui.$$('#todo-list li').$(1).$('.toggle').click();
+    await ui.$$('#todo-list li').by(have.cssClass('completed'))
       .should(have.texts('a', 'b'));
 
-    await stage.$$('#todo-list li').firstBy(have.text('d'))
+    await ui.$$('#todo-list li').firstBy(have.text('d'))
       .$('.toggle').click();
-    await stage.$$('#todo-list li').by(have.cssClass('completed'))
+    await ui.$$('#todo-list li').by(have.cssClass('completed'))
       .should(have.texts('a', 'b', 'd'));
 
-    await stage.$$('#todo-list li').by(have.no.cssClass('completed'))
+    await ui.$$('#todo-list li').by(have.no.cssClass('completed'))
       .should(have.texts('c'));
   });
 });

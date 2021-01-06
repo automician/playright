@@ -1,17 +1,17 @@
 import { chromium, BrowserContext, Browser, Page } from 'playwright';
-import { Stage, perform, have } from '../../lib';
+import { UserPage, perform, have } from '../../lib';
 
 xdescribe('Todomvc Storage', () => {
   let browser: Browser;
   let page: Page;
   let context: BrowserContext;
-  let stage: Stage;
+  let ui: UserPage;
   beforeAll(async () => {
     jest.setTimeout(60 * 1000);
     const browser = await chromium.launch({ headless: false, slowMo: 50 });
     const context = await browser.newContext();
     const page = await context.newPage();
-    stage = new Stage(
+    ui = new UserPage(
       page,
       {
         timeout: 5000,
@@ -25,12 +25,12 @@ xdescribe('Todomvc Storage', () => {
   });
 
   it('should not share todos among different users (simulating by different browser contexts)', async () => {
-    await stage.goto('http://todomvc.com/examples/emberjs');
-    await stage
+    await ui.goto('http://todomvc.com/examples/emberjs');
+    await ui
       .$('#new-todo')
       .type('a')
       .then(perform.press('Enter'));
-    await stage.$$('#todo-list li').should(have.count(1));
+    await ui.$$('#todo-list li').should(have.count(1));
 
     // const another = await director.newContext();
     // await another.page.stage.goto('http://todomvc.com/examples/emberjs');
@@ -39,12 +39,12 @@ xdescribe('Todomvc Storage', () => {
   });
 
   it('should not share todos among different browsers', async () => {
-    await stage.goto('http://todomvc.com/examples/emberjs');
-    await stage
+    await ui.goto('http://todomvc.com/examples/emberjs');
+    await ui
       .$('#new-todo')
       .type('a')
       .then(perform.press('Enter'));
-    await stage.$$('#todo-list li').should(have.count(1));
+    await ui.$$('#todo-list li').should(have.count(1));
 
     // const another = await director.newBrowser();
     // await another.page.stage.goto('http://todomvc.com/examples/emberjs');
@@ -53,12 +53,12 @@ xdescribe('Todomvc Storage', () => {
   });
 
   it('should share todos among different tabs', async () => {
-    await stage.goto('http://todomvc.com/examples/emberjs');
-    await stage
+    await ui.goto('http://todomvc.com/examples/emberjs');
+    await ui
       .$('#new-todo')
       .type('a')
       .then(perform.press('Enter'));
-    await stage.$$('#todo-list li').should(have.texts('a'));
+    await ui.$$('#todo-list li').should(have.texts('a'));
 
     // const another = await director.newPage();
     // await another.page.stage.goto('http://todomvc.com/examples/emberjs');
