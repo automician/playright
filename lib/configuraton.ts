@@ -27,5 +27,6 @@ export interface Configuration {
   context: playwright.BrowserContext;
   page: playwright.Page;
   timeout: number;
+  pollingInterval?: number;
   baseUrl?: string;
 }

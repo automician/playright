@@ -21,10 +21,11 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-import { predicate } from './utils';
-import { query } from './queries';
 import { Condition } from './callables';
 import { Element } from './element';
+import { Elements } from './elements';
+import { query } from './queries';
+import { predicate } from './utils';
 
 // TODO: do we need this match namespace?
 export namespace match {
@@ -69,7 +70,7 @@ export namespace match {
   });
 
   export const attribute = (name: string, value?: string | RegExp) => {
-    if (value) {
+    if (value !== undefined) {
       return attributeWithValue(name, value);
     }
     return attributeWithoutValue(name);
@@ -82,7 +83,19 @@ export namespace match {
 
   /* --- elements collection conditions --- */
 
-  export const texts = (...values: string[] | number[]) => Condition.failIfNotActual(`have texts ${values}`, query.texts, predicate.equalsByContainsToArray(values));
+  // throwing 'cannot read includes of undefined randomly'
+  // export const texts = (...values: string[] | number[]) => Condition.failIfNotActual(`have texts ${values}`, query.texts, predicate.equalsByContainsToArray(values));
+  export const texts = (...values: string[] | number[]) => new Condition(`have texts ${values}`, async (elements: Elements) => {
+    const actualTexts = await query.texts.call(elements);
+    if (actualTexts.length !== values.length) {
+      throw new Error(`actual ${actualTexts}`);
+    }
+    for (let i = 0; i < actualTexts.length; i += 1) {
+      if (actualTexts[i].trim() !== String(values[i]).trim()) {
+        throw new Error(`actual ${actualTexts}`);
+      }
+    }
+  });
 
   export const count = (num: number) => Condition.failIfNotActual(`have size ${num}`, query.count, predicate.equals(num));
 }

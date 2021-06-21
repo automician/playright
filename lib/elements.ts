@@ -66,10 +66,6 @@ export class Elements {
     );
   }
 
-  /**
-   *
-   * @param index number of element in elements collection starting from 1
-   */
   $(index: number): Element {
     return new Element(this.options, {
       toString: () => `${this}[${index}]`,

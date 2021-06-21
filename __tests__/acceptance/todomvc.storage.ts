@@ -35,7 +35,7 @@ describe('Todomvc Storage', () => {
     // await another.stage.$('#todo-list li').should(have.count(0));
   });
 
-  it('should not share todos among different browsers', async () => {
+  it.skip('should not share todos among different browsers', async () => {
     await stage.goto('http://todomvc.com/examples/emberjs');
     await stage
       .$('#new-todo')
@@ -49,7 +49,7 @@ describe('Todomvc Storage', () => {
     // await another.stage.$('#todo-list li').should(have.count(0));
   });
 
-  it('should share todos among different tabs', async () => {
+  it.skip('should share todos among different tabs', async () => {
     await stage.goto('http://todomvc.com/examples/emberjs');
     await stage
       .$('#new-todo')

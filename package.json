@@ -2,11 +2,11 @@
   "name": "playright",
   "description": "test- and user-oriented wrapper for Playwright",
   "homepage": "https://github.com/automician/playright",
-  "version": "0.0.14",
+  "version": "0.0.17",
   "main": "dist/index.js",
   "typings": "dist/index.d.ts",
   "dependencies": {
-    "playwright": "^1.7.1",
+    "playwright": "^1.12.2",
     "typescript": "^4.1.2"
   },
   "devDependencies": {
@@ -29,7 +29,7 @@
     "lint": "eslint --ext .ts .",
     "test": "jest",
     "build": "npm run lint && npm run test && npm run generateDocs",
-    "prepublish": "npm run compile",
+    "prepublishOnly": "npm run compile",
     "generateDocs": "typedoc --theme markdown --mode file --readme none --tsconfig lib/tsconfig.json --out tsdocs --gitRevision master lib"
   },
   "keywords": [

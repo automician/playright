@@ -11,6 +11,18 @@
 ## 0.0.next
 - TBD
 
+## 0.0.17 (released on 2021.06.21)
+- update `prepublish` to `prepublishOnly`
+
+## 0.0.16 (released on 2021.06.21)
+- add `toString` to `stage`
+
+## 0.0.15 (released on 2021.06.21)
+- update `playwright` to 1.12.1 for new debugger, tracer, etc.
+- update `have.texts` to simpler implementation with hope it will stop throwing errors randomly
+- add `stage.pause()` as alias to `stage.options.page.pause()`
+- add `Configuration.pollingInterval` to have ability to slow down retries
+
 ## 0.0.14 (released on 2021.01.05)
 - update `playwright` to 1.7.1 for big sur support
 

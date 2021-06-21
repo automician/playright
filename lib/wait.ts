@@ -22,11 +22,14 @@
 
 import { TimeoutError } from './errors';
 import { Callable } from './callables';
+import { sleep } from './utils';
 
 export class Wait<T> {
   private readonly entity: T;
 
   private readonly timeout: number;
+
+  private readonly pollingInterval: number;
 
   // TODO: do we need it as public?
   public readonly handleFailure: (error: TimeoutError) => Promise<Error>;
@@ -34,20 +37,22 @@ export class Wait<T> {
   constructor(
     // TODO: consider accepting WaitOptions object instead
     entity: T,
-    atMost: number,
+    timeout: number,
+    pollingInterval = 0,
     orFailWith: (error: TimeoutError) => Promise<Error> = async it => it,
   ) {
     this.entity = entity;
-    this.timeout = atMost;
+    this.timeout = timeout;
+    this.pollingInterval = pollingInterval;
     this.handleFailure = orFailWith;
   }
 
   atMost(timeout: number): Wait<T> {
-    return new Wait<T>(this.entity, timeout, this.handleFailure);
+    return new Wait<T>(this.entity, timeout, this.pollingInterval, this.handleFailure);
   }
 
   orFailWith(handler: (error: TimeoutError) => Promise<Error>): Wait<T> {
-    return new Wait<T>(this.entity, this.timeout, handler);
+    return new Wait<T>(this.entity, this.timeout, this.pollingInterval, handler);
   }
 
   /**
@@ -58,7 +63,6 @@ export class Wait<T> {
    */
   async for<R>(callable: Callable<T, R>): Promise<R> {
     const finishTime = new Date().getTime() + this.timeout;
-    // make assertions stack point to failed client code, omit playright path
 
     while (true) {
       try {
@@ -79,6 +83,9 @@ export class Wait<T> {
           throw handledError;
           /* eslint-enable no-await-in-loop */
         }
+      }
+      if (this.pollingInterval) {
+        await sleep(this.pollingInterval);
       }
     }
   }

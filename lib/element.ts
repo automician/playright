@@ -30,7 +30,10 @@ import { Elements } from './elements';
  * TODO: consider putting into Playright namespace
  */
 export class Element {
-  constructor(readonly options: Configuration, private readonly find: Locator<driver.ElementHandle<Node>>) {
+  constructor(
+    readonly options: Configuration,
+    private readonly find: Locator<driver.ElementHandle<Node>>,
+  ) {
     this.options = options;
     this.find = find;
   }
@@ -39,7 +42,7 @@ export class Element {
 
   async handle(): Promise<driver.ElementHandle<Node>> {
     const handle = await this.find.call();
-    if (handle === null) {
+    if (!handle) {
       throw new Error('element was not found');
     }
     return handle;

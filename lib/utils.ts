@@ -20,6 +20,8 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
+export const sleep = (ms: number) => new Promise(res => setTimeout(res, ms));
+
 export namespace fp {
   export const pipe = (...fns) => x => fns.reduce((y, f) => f(y), x);
 

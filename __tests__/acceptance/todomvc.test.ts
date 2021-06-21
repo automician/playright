@@ -47,7 +47,7 @@ describe('Todomvc', () => {
       .click();
     await stage
       .$$('#todo-list li')
-      .$(2)
+      .$(1)
       .$('.toggle')
       .click();
     await stage

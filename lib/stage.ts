@@ -32,7 +32,7 @@ export class Stage {
 
   constructor(options: Configuration) {
     this.options = options;
-    this.wait = new Wait(this, this.options.timeout);
+    this.wait = new Wait(this, options.timeout, options.pollingInterval);
   }
 
   async goto(absoluteOrRelativeUrl: string) {
@@ -41,6 +41,10 @@ export class Stage {
       toString: () => `goto ${url}`,
       call: async () => this.options.page.goto(url),
     });
+  }
+
+  async pause() {
+    await this.options.page.pause();
   }
 
   $(selector: string) {
@@ -55,5 +59,9 @@ export class Stage {
       toString: () => `$$(${selector})`,
       call: () => this.options.page.$$(selector),
     });
+  }
+
+  toString() {
+    return 'stage';
   }
 }
