@@ -11,6 +11,15 @@
 ## 0.0.next
 - TBD
 
+## 0.0.20 (released on 2021.06.22)
+- minor fix for `have.attribute`
+
+## 0.0.19 (released on 2021.06.22)
+- minor fix for `have.texts`
+
+## 0.0.18 (released on 2021.06.22)
+- update `have.texts` to check for `actual.includes(expected)` instead of `actual === expected`
+
 ## 0.0.17 (released on 2021.06.21)
 - update `prepublish` to `prepublishOnly`
 

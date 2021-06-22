@@ -54,12 +54,14 @@ export namespace match {
 
   const attributeWithValue = (name: string, value: string | RegExp) => new Condition(`has attribute: ${name}=${value}`, async (element: Element) => {
     const attr = await query.attribute(name).call(element);
-    if (value instanceof RegExp && value.test(attr)) {
-      throw new Error(`actual ${name}="${attr}"`);
+    if (typeof value === 'string') {
+      if (value === attr) {
+        return;
+      }
+    } else if (value.test(attr)) {
+      return;
     }
-    if (value !== attr) {
-      throw new Error(`actual ${name}="${attr}"`);
-    }
+    throw new Error(`actual ${name}="${attr}"`);
   });
 
   const attributeWithoutValue = (name: string) => new Condition(`has attribute: ${name}`, async (element: Element) => {
@@ -91,7 +93,9 @@ export namespace match {
       throw new Error(`actual ${actualTexts}`);
     }
     for (let i = 0; i < actualTexts.length; i += 1) {
-      if (actualTexts[i].trim() !== String(values[i]).trim()) {
+      const actual = actualTexts[i].trim();
+      const expected = String(values[i]).trim();
+      if (!actual.includes(expected)) {
         throw new Error(`actual ${actualTexts}`);
       }
     }
