@@ -11,6 +11,9 @@
 ## 0.0.next
 - TBD
 
+## 0.0.21 (released on 2021.07.01)
+- update signature for actions in `Element`
+
 ## 0.0.20 (released on 2021.06.22)
 - minor fix for `have.attribute`
 

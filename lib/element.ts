@@ -23,8 +23,8 @@
 import * as driver from 'playwright';
 import { Condition, Locator } from './callables';
 import { Configuration } from './configuraton';
-import { Wait } from './wait';
 import { Elements } from './elements';
+import { Wait } from './wait';
 
 /**
  * TODO: consider putting into Playright namespace
@@ -106,14 +106,20 @@ export class Element {
    */
   async type(
     text: string,
-    options = {
+    options: {
+      delay?: number,
+      noWaitAfter?: boolean,
+      timeout?: number,
+    } = {},
+  ): Promise<Element> {
+    const defaultOptions = {
       delay: 0,
       noWaitAfter: false,
-    },
-  ): Promise<Element> {
+      timeout: 5000,
+    };
     await this.wait.for({
       toString: () => `type ${text}`,
-      call: async () => this.handle().then(its => its.type(text, { ...options, timeout: 5000 })),
+      call: async () => this.handle().then(its => its.type(text, { ...defaultOptions, ...options })),
     });
     return this;
   }
@@ -124,23 +130,31 @@ export class Element {
    * @param options should be like ElementHandleFillOptions from playwright
    * but without timeout becuase we have our own waiting logic and timeout
    */
-  async fill(value: string, { noWaitAfter = false } = {}): Promise<Element> {
+  async fill(value: string, options: { timeout?: number, noWaitAfter?: boolean } = {}): Promise<Element> {
+    const defaultOptions = {
+      noWaitAfter: false,
+      timeout: 1000,
+    };
     await this.wait.for({
       toString: () => `fill ${value}`,
       call: async () => {
         const handle = await this.handle();
-        await handle.fill(value, { noWaitAfter, timeout: 1000 });
+        await handle.fill(value, { ...defaultOptions, ...options });
       },
     });
     return this;
   }
 
-  async setValue(value: string): Promise<Element> {
+  async setValue(value: string, options: { timeout?: number, noWaitAfter?: boolean } = {}): Promise<Element> {
+    const defaultOptions = {
+      noWaitAfter: false,
+      timeout: 1000,
+    };
     await this.wait.for({
       toString: () => `set value ${value}`,
       call: async () => {
         await this.click({ clickCount: 3 });
-        await this.fill(value);
+        await this.fill(value, { ...defaultOptions, ...options });
       },
     });
     return this;
@@ -153,39 +167,32 @@ export class Element {
    * @param options should be like ElementHandlePressOptions from playwright
    * but without timeout becuase we have our own waiting logic and timeout
    */
-  async press(key: string, { delay = 0, noWaitAfter = false } = {}): Promise<Element> {
+  async press(key: string, options: { timeout?: number, delay?: number, noWaitAfter?: boolean} = {}): Promise<Element> {
+    const defaultOptions = {
+      delay: 0,
+      noWaitAfter: false,
+      timeout: 1000,
+    };
     await this.wait.for({
       toString: () => `press ${key}`,
-      call: async () => this.handle().then(its => its.press(key, { delay, noWaitAfter, timeout: 1000 })),
+      call: async () => this.handle().then(its => its.press(key, { ...defaultOptions, ...options })),
     });
     return this;
   }
 
-  async click({
-    button = 'left', // |"right"|"middle";
-    clickCount = 1,
-    delay = 0,
-    position = undefined,
-    modifiers = undefined, // Array<"Alt"|"Control"|"Meta"|"Shift">,
-    force = false,
-    noWaitAfter = false,
+  async click(options: {
+    button ?: 'left' | 'right' | 'middle', // |"right"|"middle";
+    clickCount ?: number,
+    delay ?: number,
+    position?: { x: number, y: number, }
+    modifiers?: Array<'Alt'|'Control'|'Meta'|'Shift'>,
+    force?: boolean,
+    noWaitAfter?: boolean,
   } = {}): Promise<Element> {
-    const buttonName = button;
     await this.wait.for({
       // TODO: log in toString options too in case they are not default
-      toString: () => 'click',
-      call: async () => this.handle().then(its => its.click({
-        // TODO: o_O not sure wtf so I need the workaround below...
-        // eslint-disable-next-line no-nested-ternary
-        button: buttonName === 'left' ? 'left' : buttonName === 'right' ? 'right' : 'middle',
-        clickCount,
-        delay,
-        position,
-        modifiers,
-        force,
-        noWaitAfter,
-        timeout: 1000,
-      })),
+      toString: () => `${options.button || 'left'} click`,
+      call: async () => this.handle().then(its => its.click(options)),
     });
     return this;
   }
@@ -193,8 +200,16 @@ export class Element {
   /**
    * TODO: shouldn't we call (await this.handle).dblClick() ?
    */
-  async doubleClick(): Promise<Element> {
-    await this.click({ clickCount: 2 });
+  async doubleClick(options: {
+    button ?: 'left' | 'right' | 'middle', // |"right"|"middle";
+    clickCount ?: number,
+    delay ?: number,
+    position?: { x: number, y: number, }
+    modifiers?: Array<'Alt'|'Control'|'Meta'|'Shift'>,
+    force?: boolean,
+    noWaitAfter?: boolean,
+  } = {}): Promise<Element> {
+    await this.click({ ...{ clickCount: 2 }, ...options });
     return this;
   }
 
