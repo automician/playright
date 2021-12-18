@@ -2,7 +2,7 @@
 
 Play the right test- and user-oriented way with Playwright ;)
 
-It is also a port of [Selenide](https://selenide.org/), [Selene](https://github.com/yashaka/selene), ][NSelene](https://github.com/yashaka/nselene), [SelenideJs](https://selenidejs.org/) from selenium webdriver world.
+It is also a port of [Selenide](https://selenide.org/), [Selene](https://github.com/yashaka/selene), [NSelene](https://github.com/yashaka/nselene), [SelenideJs](https://selenidejs.org/) from selenium webdriver world.
 
 It is yet a very early draft version of the wrapper, where we play and experiment with API design to find the most optimal and efficient way of working with Playwright from user and testing perspective. 
 
